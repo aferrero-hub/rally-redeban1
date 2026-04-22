@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSprint · Redeban × Súmmum</title>
+<style>
+:root{
+  --navy:#04122e;--navy2:#071b45;--teal:#00b89c;--teal2:#00e8c6;
+  --accent:#ff5252;--amber:#ffb300;--white:#eef2fb;--muted:#6b7fa3;
+  --card:rgba(255,255,255,0.04);--border:rgba(0,184,156,0.18);
+  --green:#2ed573;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--navy);color:var(--white);font-family:'Trebuchet MS',Trebuchet,Arial,sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,184,156,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,184,156,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 20px 80px;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 0 16px;border-bottom:1px solid var(--border);margin-bottom:26px;}
+.hdr-left{display:flex;align-items:center;gap:14px;}
+.rb-logo{height:26px;filter:brightness(0) invert(1);opacity:.9;}
+.pipe{width:1px;height:20px;background:var(--border);}
+.sm-tag{font-size:10px;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;}
+.hdr-right{font-size:11px;color:var(--muted);text-align:right;line-height:1.7;}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:22px;}
+.prog-meta{display:flex;justify-content:space-between;margin-bottom:6px;}
+.prog-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.prog-pct{font-size:10px;color:var(--teal);}
+.prog-track{height:2px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal2));border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+
+/* SCREENS */
+.screen{display:none;animation:fadeUp .3s ease;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* CULTURAL BANNER */
+
+.cb-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+.cb-icon{font-size:26px;flex-shrink:0;margin-top:2px;}
+.cb-content{flex:1;}
+.cb-attr{font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;}
+
+.cb-text{font-size:13px;color:#a8c0d8;line-height:1.6;}
+.cb-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;}
+.cb-tag{font-size:10px;color:var(--teal);background:rgba(0,184,156,0.1);border:1px solid rgba(0,184,156,0.2);border-radius:20px;padding:3px 12px;}
+.cb-btn{background:var(--teal);color:var(--navy);font-family:'Trebuchet MS',sans-serif;font-size:13px;font-weight:700;padding:8px 20px;border:none;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.cb-btn:hover{background:var(--teal2);}
+.cb-hint{font-size:10px;color:var(--muted);}
+
+/* RETO CONTENT */
+
+/* REVEAL */
+.reveal-box{display:none;margin-top:14px;border-radius:12px;padding:18px 20px;animation:fadeUp .35s ease;}
+.reveal-box.show{display:block;}
+.reveal-box.correct{background:rgba(46,213,115,0.08);border:1px solid rgba(46,213,115,0.25);}
+.reveal-box.wrong{background:rgba(255,82,82,0.07);border:1px solid rgba(255,82,82,0.2);}
+.reveal-box.neutral{background:rgba(0,184,156,0.07);border:1px solid rgba(0,184,156,0.2);}
+.rv-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.rv-icon{font-size:22px;}
+.rv-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+.reveal-box.correct .rv-label{color:var(--green);}
+.reveal-box.wrong .rv-label{color:var(--accent);}
+.reveal-box.neutral .rv-label{color:var(--teal);}
+.rv-answer{font-size:15px;font-weight:700;color:var(--white);margin-bottom:6px;}
+.rv-insight{font-size:13px;color:#c5d3ee;line-height:1.6;}
+.rv-insight em{color:var(--teal);font-style:normal;}
+
+/* TIMEOUT */
+.timeout-overlay{display:none;position:fixed;inset:0;background:rgba(4,18,46,.97);z-index:300;align-items:center;justify-content:center;text-align:center;flex-direction:column;}
+.timeout-overlay.show{display:flex;animation:fadeUp .3s;}
+.to-icon{font-size:52px;margin-bottom:14px;}
+.to-title{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:8px;}
+.to-sub{font-size:14px;color:var(--muted);}
+
+/* FLASH */
+.flash{position:fixed;inset:0;background:rgba(255,82,82,.1);z-index:100;pointer-events:none;opacity:0;transition:opacity .1s;}
+.flash.on{opacity:1;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal);color:var(--navy);font-size:12px;padding:10px 20px;border-radius:8px;font-weight:700;opacity:0;transition:all .3s;z-index:400;pointer-events:none;max-width:360px;text-align:center;line-height:1.5;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* RETO HEADER */
+.reto-hdr{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;}
+.reto-chip{font-size:10px;color:var(--teal);background:rgba(0,184,156,0.1);border:1px solid var(--border);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+.reto-title{font-size:21px;font-weight:700;color:var(--white);line-height:1.2;margin-bottom:5px;}
+.reto-sub{font-size:13px;color:var(--muted);}
+
+/* TIMER */
+.timer{display:flex;align-items:center;gap:12px;background:rgba(255,82,82,0.07);border:1px solid rgba(255,82,82,0.18);border-radius:10px;padding:11px 16px;margin-bottom:20px;}
+.timer-label{font-size:11px;color:var(--muted);flex:1;text-transform:uppercase;letter-spacing:.06em;}
+.timer-val{font-size:20px;font-weight:700;color:var(--accent);}
+.timer-val.ok{color:var(--amber);}
+.timer-val.urgent{animation:blink .4s infinite alternate;}
+@keyframes blink{from{opacity:1;}to{opacity:.3;}}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px;margin-bottom:14px;}
+.card-lbl{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+
+/* SCENE */
+.scene{background:rgba(0,184,156,0.05);border:1px solid rgba(0,184,156,0.14);border-left:3px solid var(--teal);border-radius:10px;padding:16px 18px;margin-bottom:18px;font-size:14px;line-height:1.75;color:#c5d3ee;}
+.scene strong{color:var(--white);font-weight:700;}
+.scene em{color:var(--teal);font-style:normal;}
+
+/* EALERT */
+.ealert{background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.18);border-left:3px solid var(--amber);border-radius:10px;padding:16px 18px;margin-bottom:18px;font-size:14px;line-height:1.75;color:#e8d5a0;}
+.ea-title{font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+
+/* PISTAS */
+.pistas-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px;}
+.pista{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:11px 13px;font-size:13px;color:#c5d3ee;line-height:1.5;}
+.pista-n{font-size:9px;color:var(--teal);margin-bottom:4px;letter-spacing:.06em;}
+
+/* INST LIST */
+.inst-list{list-style:none;}
+.inst-item{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;color:#c5d3ee;line-height:1.55;align-items:flex-start;}
+.inst-item:last-child{border-bottom:none;}
+.inst-n{font-size:10px;color:var(--muted);min-width:22px;margin-top:2px;}
+.inst-item.hl{color:var(--white);}
+.inst-item.hl .inst-n{color:var(--teal);}
+
+/* INPUTS */
+input[type=text],textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 15px;font-family:'Trebuchet MS',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color .2s;resize:none;}
+input[type=text]:focus,textarea:focus{border-color:var(--teal);background:rgba(0,184,156,0.04);}
+input::placeholder,textarea::placeholder{color:var(--muted);}
+.inp-lbl{font-size:12px;color:var(--muted);margin-bottom:7px;display:block;}
+.inp-grp{margin-bottom:13px;}
+.inp-field-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;margin-bottom:7px;}
+
+/* OPTIONS */
+.opts{list-style:none;}
+.opt{display:flex;align-items:flex-start;gap:11px;padding:12px 15px;border:1px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:7px;cursor:pointer;transition:all .15s;font-size:14px;color:#c5d3ee;line-height:1.5;}
+.opt:hover{border-color:var(--teal);background:rgba(0,184,156,0.04);}
+.opt.sel{border-color:var(--teal);background:rgba(0,184,156,0.07);color:var(--white);}
+.opt-box{width:18px;height:18px;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.18);border-radius:4px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;}
+.opt.sel .opt-box{background:var(--teal);border-color:var(--teal);color:var(--navy);}
+.opt-radio .opt-box{border-radius:50%;}
+
+/* GRADIENTE DWECK */
+.grad-wrap{margin-bottom:8px;}
+.grad-opt{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border:1px solid rgba(255,255,255,0.07);border-radius:10px;cursor:pointer;transition:all .15s;font-size:14px;color:#c5d3ee;line-height:1.5;margin-bottom:7px;}
+.grad-opt:hover{border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.02);}
+.grad-opt.sel{color:var(--white);}
+.grad-dot{width:14px;height:14px;flex-shrink:0;border-radius:50%;margin-top:3px;border:2px solid rgba(255,255,255,0.15);transition:all .15s;}
+.grad-opt.sel .grad-dot{border-color:transparent;}
+.go1 .grad-dot,.go1.sel{border-color:rgba(255,82,82,0.4);background:rgba(255,82,82,0.07);}
+.go1 .grad-dot{background:rgba(255,82,82,0.5);}
+.go2 .grad-dot,.go2.sel{border-color:rgba(255,179,0,0.35);background:rgba(255,179,0,0.06);}
+.go2 .grad-dot{background:rgba(255,179,0,0.6);}
+.go3 .grad-dot,.go3.sel{border-color:rgba(0,184,156,0.35);background:rgba(0,184,156,0.06);}
+.go3 .grad-dot{background:rgba(0,184,156,0.7);}
+.go4 .grad-dot,.go4.sel{border-color:rgba(0,232,198,0.4);background:rgba(0,232,198,0.07);}
+.go4 .grad-dot{background:rgba(0,232,198,0.9);}
+.grad-legend{display:flex;justify-content:space-between;font-size:10px;padding:0 4px;}
+.grad-legend .gl-fija{color:var(--accent);}
+.grad-legend .gl-creci{color:var(--teal);}
+
+/* ZONA */
+.zona-situation{background:rgba(255,82,82,0.06);border:1px solid rgba(255,82,82,0.15);border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:14px;line-height:1.7;color:#e8c5c5;}
+.zs-title{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.zona-score{display:flex;align-items:center;gap:10px;background:rgba(0,184,156,0.06);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);}
+.zona-pts{font-size:22px;font-weight:700;color:var(--teal);margin-right:4px;}
+.rescate-item{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+.rescate-item.rescued{border-color:rgba(0,184,156,0.3);background:rgba(0,184,156,0.04);}
+.rescate-item.abandoned{border-color:rgba(255,82,82,0.2);background:rgba(255,82,82,0.03);}
+.ri-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:10px;line-height:1.4;}
+.ri-btns{display:flex;gap:7px;flex-wrap:wrap;}
+.ri-btn{font-family:'Trebuchet MS',sans-serif;font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
+.ri-btn:hover{border-color:var(--teal);color:var(--teal);}
+.ri-btn.sel-c{background:rgba(0,184,156,0.12);border-color:var(--teal);color:var(--teal);}
+.ri-btn.sel-i{background:rgba(255,179,0,0.1);border-color:var(--amber);color:var(--amber);}
+.ri-btn.sel-o{background:rgba(255,82,82,0.08);border-color:var(--accent);color:var(--accent);}
+.zona-outside-msg{display:none;margin-top:10px;background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.18);border-radius:8px;padding:12px 14px;animation:fadeUp .2s ease;}
+.zona-outside-msg.show{display:block;}
+.zom-text{font-size:13px;color:#e8d5a0;line-height:1.6;margin-bottom:9px;}
+.zom-text strong{color:var(--amber);}
+.zom-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,179,0,0.2);border-radius:8px;padding:9px 12px;font-family:'Trebuchet MS',sans-serif;font-size:13px;color:var(--white);outline:none;}
+.zom-input:focus{border-color:var(--amber);}
+.zom-input::placeholder{color:var(--muted);}
+.sub-zone{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);animation:fadeUp .2s ease;}
+.sub-zone.show{display:block;}
+.sz-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;}
+
+/* TAGS */
+.tag{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:3px 9px;border-radius:20px;margin-right:5px;margin-bottom:5px;}
+.tag-t{background:rgba(0,184,156,0.1);color:var(--teal);border:1px solid rgba(0,184,156,0.2);}
+.tag-a{background:rgba(255,179,0,0.08);color:var(--amber);border:1px solid rgba(255,179,0,0.18);}
+
+/* BTN */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;padding:13px 26px;border-radius:10px;cursor:pointer;transition:all .15s;width:100%;margin-top:6px;border:none;}
+.btn-p{background:var(--teal);color:var(--navy);}
+.btn-p:hover{background:var(--teal2);transform:translateY(-1px);}
+.div{height:1px;background:rgba(255,255,255,0.05);margin:14px 0;}
+
+/* COVER */
+.cover-eye{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px;}
+.cover-hero{display:flex;align-items:center;gap:18px;margin-bottom:6px;}
+.cover-icons{display:flex;flex-direction:column;gap:6px;}
+.cover-icon{width:44px;height:44px;border-radius:10px;background:rgba(0,184,156,0.08);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.cover-title{font-size:40px;font-weight:700;line-height:1.05;color:var(--white);}
+.cover-title em{color:var(--teal);font-style:normal;}
+.cover-tagline{font-size:12px;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-top:6px;}
+.cover-sub{font-size:15px;color:var(--muted);line-height:1.65;margin:16px 0 24px;max-width:500px;}
+.collab-box{background:rgba(0,184,156,0.05);border:1px solid rgba(0,184,156,0.15);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#a8c0d8;line-height:1.6;}
+.collab-box strong{color:var(--teal);}
+.rules-box{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px 22px;margin-bottom:22px;}
+.rule{display:flex;gap:10px;padding:8px 0;font-size:13px;color:#c5d3ee;border-bottom:1px solid rgba(255,255,255,0.04);line-height:1.55;}
+.rule:last-child{border-bottom:none;}
+.rule-ico{color:var(--teal);flex-shrink:0;}
+
+/* FINAL */
+.final-hero{text-align:center;padding:36px 0 20px;}
+.final-num{font-size:56px;font-weight:700;color:var(--teal2);display:block;margin-bottom:4px;}
+.final-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px;display:block;}
+.bd-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;}
+.bd-item:last-child{border-bottom:none;}
+.bd-name{flex:1;color:#c5d3ee;}
+.bd-pt{font-size:12px;font-weight:700;min-width:55px;text-align:right;}
+.pt-g{color:var(--teal);}
+.pt-p{color:var(--amber);}
+.pt-z{color:var(--muted);}
+.atributo-final{background:linear-gradient(135deg,rgba(0,184,156,0.1),rgba(0,232,198,0.04));border:1px solid rgba(0,184,156,0.25);border-radius:16px;padding:24px;margin-top:16px;text-align:center;}
+.af-label{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.14em;margin-bottom:6px;}
+.af-attr{font-size:16px;font-weight:700;color:var(--white);margin-bottom:10px;}
+.af-text{font-size:14px;color:#a8c0d8;line-height:1.7;}
+.af-def{font-size:12px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;line-height:1.6;}
+.rb-final-logo{height:20px;filter:brightness(0) invert(1);opacity:.5;margin:14px auto 0;display:block;}
+
+/* MINI-CARD POST-RETO */
+.mc-wrap{position:fixed;bottom:0;left:0;right:0;z-index:500;padding:0 16px 16px;animation:slideUp .35s cubic-bezier(.4,0,.2,1);}
+@keyframes slideUp{from{transform:translateY(110%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.mc-inner{max-width:720px;margin:0 auto;background:rgba(7,27,69,0.97);border:1px solid rgba(0,184,156,0.3);border-top:2px solid var(--teal);border-radius:14px 14px 0 0;padding:16px 20px;display:flex;align-items:flex-start;gap:14px;box-shadow:0 -8px 32px rgba(0,0,0,0.5);}
+.mc-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.mc-body{flex:1;min-width:0;}
+.mc-attr{font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;}
+.mc-text{font-size:13px;color:#c5d3ee;line-height:1.6;}
+.mc-btn{background:var(--teal);color:var(--navy);font-family:'Trebuchet MS',sans-serif;font-size:12px;font-weight:700;padding:8px 18px;border:none;border-radius:8px;cursor:pointer;flex-shrink:0;margin-top:1px;transition:background .15s;}
+.mc-btn:hover{background:var(--teal2);}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="timeout-overlay" id="toOverlay">
+  <div class="to-icon">⏰</div>
+  <div class="to-title">¡Tiempo!</div>
+  <div class="to-sub" id="toMsg">El sistema avanza solo...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<div class="wrap">
+<div class="hdr">
+  <div class="hdr-left">
+    <img src="https://www.redeban.com/sites/default/files/Logo.png" class="rb-logo" alt="Redeban" onerror="this.style.display='none'">
+    <div class="pipe"></div>
+    <span class="sm-tag">Súmmum · W1</span>
+  </div>
+  <div class="hdr-right">Workshop #1<br><span id="hdrReto" style="color:var(--teal);">Mentalidad del colaborador</span></div>
+</div>
+
+<div class="prog-wrap" id="progWrap" style="display:none;">
+  <div class="prog-meta">
+    <span class="prog-label" id="progLbl">Reto 1 de 8</span>
+    <span class="prog-pct" id="progPct">12%</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="progFill" style="width:12%"></div></div>
+</div>
+
+<!-- ═══ S0: PORTADA ═══ -->
+<div class="screen active" id="s0">
+  <div class="cover-eye">Rally Creativo · En vivo ahora</div>
+  <div class="cover-hero">
+    <div class="cover-icons">
+      <div class="cover-icon">🧠</div>
+      <div class="cover-icon">⚡</div>
+    </div>
+    <div>
+      <h1 class="cover-title">Mind<em>Sprint</em></h1>
+      <div class="cover-tagline">Mentalidad · Agilidad · Reto</div>
+    </div>
+  </div>
+  <p class="cover-sub">15 minutos. Sin red. Sin guion. Solo la forma en que tu mente enfrenta lo inesperado — y la agilidad con la que decides actuar.</p>
+  <div class="collab-box">💬 <strong>¿Necesitas ayuda?</strong> Pídela. Tus grupos de WhatsApp, chats de Teams y compañeros existen para esto. La colaboración no es trampa — es inteligencia en acción.</div>
+  <div class="rules-box">
+    <div class="card-lbl">Cómo funciona</div>
+    <div class="rule"><span class="rule-ico">→</span>Disfruta el reto. No hay respuestas buenas ni malas, solo formas de pensar.</div>
+    <div class="rule"><span class="rule-ico">→</span>Las preguntas no son difíciles. Lo que las hace difíciles es asumir que lo son.</div>
+    <div class="rule"><span class="rule-ico">→</span>Si necesitas ayuda, pídela. WhatsApp, Teams, lo que tengas.</div>
+    <div class="rule"><span class="rule-ico">→</span><strong style="color:var(--white);">Sin IA.</strong> Este rally mide cómo piensas tú.</div>
+    <div class="rule"><span class="rule-ico">→</span>Cada reto tiene tiempo límite. Cuando se acaba, el sistema avanza solo.</div>
+    <div class="rule"><span class="rule-ico">→</span>Sé honesto(a). Nadie te juzga aquí.</div>
+  </div>
+  <div class="inp-grp"><label class="inp-field-lbl">Tu nombre completo</label><input type="text" id="inp_nombre" placeholder="Ej: María González" autocomplete="off"></div>
+  <div class="inp-grp"><label class="inp-field-lbl">Tu área en Redeban</label><input type="text" id="inp_area" placeholder="Ej: Tecnología, Operaciones..." autocomplete="off"></div>
+  <button class="btn btn-p" onclick="startRally()">¡Arrancar el MindSprint! →</button>
+</div>
+
+<!-- ═══ S1: LISTA DE VERIFICACIÓN ═══ -->
+<div class="screen" id="s1">
+  <div class="reto-content" id="rc1">
+    <div class="reto-hdr"><div class="reto-chip">RETO 01</div><div><div class="reto-title">La lista de verificación</div><div class="reto-sub">Lee todo antes de hacer cualquier cosa</div></div></div>
+    <div class="timer" id="tmr1"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv1">3:00</span></div>
+    <div class="scene"><strong>Instrucción:</strong> Lee <u>todas</u> las instrucciones de esta lista antes de ejecutar cualquier acción.</div>
+    <div class="card">
+      <ul class="inst-list">
+        <li class="inst-item"><span class="inst-n">01.</span>Escribe tu número de cédula al revés en el campo de abajo.</li>
+        <li class="inst-item"><span class="inst-n">02.</span>Suma todos los dígitos de tu número de cédula y escribe el resultado.</li>
+        <li class="inst-item"><span class="inst-n">03.</span>Escribe el nombre de tu líder directo en mayúsculas sostenidas.</li>
+        <li class="inst-item"><span class="inst-n">04.</span>Toma un papel, escribe "REDEBAN" y dibuja un rectángulo alrededor. Levántalo a la cámara.</li>
+        <li class="inst-item"><span class="inst-n">05.</span>Escribe cuántos años llevas en Redeban multiplicado por 7.</li>
+        <li class="inst-item"><span class="inst-n">06.</span>Escribe el nombre del área que queda al lado de la tuya en el organigrama.</li>
+        <li class="inst-item"><span class="inst-n">07.</span>Cuenta cuántas aplicaciones tienes abiertas ahora. Escribe ese número en números romanos.</li>
+        <li class="inst-item"><span class="inst-n">08.</span>Escribe la fecha de hoy con formato DD·MM·AAAA.</li>
+        <li class="inst-item"><span class="inst-n">09.</span>Escribe el nombre de un compañero(a) de otra área con quien trabajaste este mes.</li>
+        <li class="inst-item hl"><span class="inst-n">10.</span><strong>Si llegaste hasta acá sin escribir nada aún: escribe únicamente la palabra AUTORIZADO en el campo de abajo y omite todo lo anterior. Eso vale 100 puntos.</strong></li>
+      </ul>
+    </div>
+    <div class="inp-grp"><label class="inp-lbl">Tu respuesta:</label><textarea id="r1" rows="3" placeholder="Escribe aquí..."></textarea></div>
+    <button class="btn btn-p" onclick="confirmar(1)">Confirmar →</button>
+  </div>
+</div>
+
+<!-- ═══ S2: VIERNES 5:55 ═══ -->
+<div class="screen" id="s2">
+  <div class="reto-content" id="rc2">
+    <div class="reto-hdr"><div class="reto-chip">RETO 02</div><div><div class="reto-title">Viernes 5:55 p.m.</div><div class="reto-sub">3 momentos · 45 seg cada uno</div></div></div>
+    <div class="timer" id="tmr2"><span>⏱</span><span class="timer-label">Momento <span id="capaLbl">1</span> de 3</span><span class="timer-val" id="tv2">0:45</span></div>
+    <div id="c2_1">
+      <div class="ealert"><div class="ea-title">⚡ Momento 1 — Tú eres quien contesta</div>Son las 5:55 p.m. del viernes. Tu celular suena. Es un comercio aliado de Redeban: llevan más de una hora sin poder recibir pagos con tarjeta. Tienen fila de clientes. Tu líder no contesta.<br><br><strong>¿Cuál es lo primero que haces? No lo que investigarías — lo que HACES ahora mismo.</strong></div>
+      <div class="inp-grp"><textarea id="r2a" rows="2" placeholder="Escribe tu acción concreta..."></textarea></div>
+      <button class="btn btn-p" onclick="nextCapa(2)">Confirmar momento 1 →</button>
+    </div>
+    <div id="c2_2" style="display:none;">
+      <div class="ealert"><div class="ea-title">⚡ Momento 2 — El comercio pregunta qué pasó</div>Revisas todo lo que puedes: el sistema muestra que todo debería funcionar. Pero los pagos no pasan. No tienes la respuesta. El comercio te pregunta: <em>"¿Qué fue lo que pasó?"</em><br><br><strong>¿Qué le dices? Escribe exactamente lo que dirías.</strong></div>
+      <div class="inp-grp"><textarea id="r2b" rows="2" placeholder="Escribe exactamente lo que le dirías..."></textarea></div>
+      <button class="btn btn-p" onclick="nextCapa(3)">Confirmar momento 2 →</button>
+    </div>
+    <div id="c2_3" style="display:none;">
+      <div class="ealert"><div class="ea-title">⚡ Momento 3 — Lunes en la mañana</div>El problema se resolvió solo al reiniciarse el sistema a medianoche. El lunes, tu líder pregunta: <em>"¿Qué aprendemos de esto?"</em><br><br><strong>¿Qué dices tú? Sé específico(a).</strong></div>
+      <div class="inp-grp"><textarea id="r2c" rows="2" placeholder="Escribe tu aprendizaje..."></textarea></div>
+      <button class="btn btn-p" onclick="confirmar(2)">Confirmar y continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S3: ZONA DE INFLUENCIA ═══ -->
+<div class="screen" id="s3">
+  <div class="reto-content" id="rc3">
+    <div class="reto-hdr"><div class="reto-chip">RETO 03</div><div><div class="reto-title">Operación Rescate</div><div class="reto-sub">¿Qué puedes mover realmente?</div></div></div>
+    <div class="timer" id="tmr3"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv3">2:30</span></div>
+    <div class="zona-situation"><div class="zs-title">🚨 Situación crítica</div>Tu proyecto lleva 2 semanas de retraso. La entrega es en 3 días. Tu equipo está bajo presión. Clasifica cada variable según tu capacidad de acción. <strong style="color:#e8c5c5;">Cada variable que traes a tu zona de acción suma puntos.</strong></div>
+    <div class="zona-score"><span class="zona-pts" id="zonaScore">0</span>variables en tu zona de acción · <span id="zonaMsg">¡Clasifica para sumar!</span></div>
+    <div id="zonaGame">
+      <div class="rescate-item" id="ri0"><div class="ri-title">1. Mi actitud frente al equipo durante estos 3 días</div><div class="ri-btns"><button class="ri-btn" onclick="zonaSelect(0,'c')">Lo controlo</button><button class="ri-btn" onclick="zonaSelect(0,'i')">Puedo influir</button><button class="ri-btn" onclick="zonaSelectOut(0)">Fuera de mi alcance</button></div><div class="sub-zone" id="sz0"></div><div class="zona-outside-msg" id="zom0"><div class="zom-text"><strong>Antes de soltarlo:</strong> ¿Hay algo, aunque sea pequeño, que sí puedas hacer aquí?</div><input class="zom-input" id="zominp0" placeholder="Escribe algo que sí puedas hacer..."></div></div>
+      <div class="rescate-item" id="ri1"><div class="ri-title">2. El plazo de entrega que ya se comunicó al cliente</div><div class="ri-btns"><button class="ri-btn" onclick="zonaSelect(1,'c')">Lo controlo</button><button class="ri-btn" onclick="zonaSelect(1,'i')">Puedo influir</button><button class="ri-btn" onclick="zonaSelectOut(1)">Fuera de mi alcance</button></div><div class="sub-zone" id="sz1"></div><div class="zona-outside-msg" id="zom1"><div class="zom-text"><strong>Antes de soltarlo:</strong> ¿Hay algo, aunque sea pequeño, que sí puedas hacer aquí?</div><input class="zom-input" id="zominp1" placeholder="Escribe algo que sí puedas hacer..."></div></div>
+      <div class="rescate-item" id="ri2"><div class="ri-title">3. La calidad de mi trabajo en los días que quedan</div><div class="ri-btns"><button class="ri-btn" onclick="zonaSelect(2,'c')">Lo controlo</button><button class="ri-btn" onclick="zonaSelect(2,'i')">Puedo influir</button><button class="ri-btn" onclick="zonaSelectOut(2)">Fuera de mi alcance</button></div><div class="sub-zone" id="sz2"></div><div class="zona-outside-msg" id="zom2"><div class="zom-text"><strong>Antes de soltarlo:</strong> ¿Hay algo, aunque sea pequeño, que sí puedas hacer aquí?</div><input class="zom-input" id="zominp2" placeholder="Escribe algo que sí puedas hacer..."></div></div>
+      <div class="rescate-item" id="ri3"><div class="ri-title">4. La percepción que tiene el cliente sobre el retraso</div><div class="ri-btns"><button class="ri-btn" onclick="zonaSelect(3,'c')">Lo controlo</button><button class="ri-btn" onclick="zonaSelect(3,'i')">Puedo influir</button><button class="ri-btn" onclick="zonaSelectOut(3)">Fuera de mi alcance</button></div><div class="sub-zone" id="sz3"></div><div class="zona-outside-msg" id="zom3"><div class="zom-text"><strong>Antes de soltarlo:</strong> ¿Hay algo, aunque sea pequeño, que sí puedas hacer aquí?</div><input class="zom-input" id="zominp3" placeholder="Escribe algo que sí puedas hacer..."></div></div>
+      <div class="rescate-item" id="ri4"><div class="ri-title">5. La disponibilidad de tu compañero clave que está de vacaciones</div><div class="ri-btns"><button class="ri-btn" onclick="zonaSelect(4,'c')">Lo controlo</button><button class="ri-btn" onclick="zonaSelect(4,'i')">Puedo influir</button><button class="ri-btn" onclick="zonaSelectOut(4)">Fuera de mi alcance</button></div><div class="sub-zone" id="sz4"></div><div class="zona-outside-msg" id="zom4"><div class="zom-text"><strong>Antes de soltarlo:</strong> ¿Hay algo, aunque sea pequeño, que sí puedas hacer aquí?</div><input class="zom-input" id="zominp4" placeholder="Escribe algo que sí puedas hacer..."></div></div>
+      <div class="rescate-item" id="ri5"><div class="ri-title">6. La decisión de tu líder de agregar más tareas esta semana</div><div class="ri-btns"><button class="ri-btn" onclick="zonaSelect(5,'c')">Lo controlo</button><button class="ri-btn" onclick="zonaSelect(5,'i')">Puedo influir</button><button class="ri-btn" onclick="zonaSelectOut(5)">Fuera de mi alcance</button></div><div class="sub-zone" id="sz5"></div><div class="zona-outside-msg" id="zom5"><div class="zom-text"><strong>Antes de soltarlo:</strong> ¿Hay algo, aunque sea pequeño, que sí puedas hacer aquí?</div><input class="zom-input" id="zominp5" placeholder="Escribe algo que sí puedas hacer..."></div></div>
+    </div>
+    <button class="btn btn-p" style="margin-top:14px;" onclick="confirmar(3)">Confirmar clasificación →</button>
+  </div>
+</div>
+
+<!-- ═══ S4: EL PUZZLE ═══ -->
+<div class="screen" id="s4">
+  <div class="reto-content" id="rc4">
+    <div class="reto-hdr"><div class="reto-chip">RETO 04</div><div><div class="reto-title">El día del lanzamiento</div><div class="reto-sub">¿Quién hizo qué y en qué orden?</div></div></div>
+    <div class="timer" id="tmr4"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv4">4:00</span></div>
+    <div class="scene">Cinco personas del equipo Redeban lanzaron una nueva funcionalidad. Cada una entregó un componente en un orden específico. <em>Con las pistas, descubre el orden completo.</em><br><br><strong>💬 ¿Atascado(a)?</strong> Escribe en tu grupo de WhatsApp o chat de Teams. La colaboración suma.</div>
+    <div class="card" style="margin-bottom:11px;">
+      <div class="card-lbl">Personas</div>
+      <div style="margin-bottom:10px;"><span class="tag tag-t">Sara</span><span class="tag tag-t">Andrés</span><span class="tag tag-t">Helena</span><span class="tag tag-t">Marta</span><span class="tag tag-t">Daniel</span></div>
+      <div class="div"></div>
+      <div class="card-lbl">Componentes</div>
+      <div><span class="tag tag-a">Diagnóstico</span><span class="tag tag-a">API</span><span class="tag tag-a">Reporte</span><span class="tag tag-a">Manual</span><span class="tag tag-a">Cierre</span></div>
+    </div>
+    <div class="pistas-grid">
+      <div class="pista"><div class="pista-n">PISTA 01</div>Sara no entregó ni el primero ni el último componente.</div>
+      <div class="pista"><div class="pista-n">PISTA 02</div>El Diagnóstico fue entregado antes que el API.</div>
+      <div class="pista"><div class="pista-n">PISTA 03</div>Daniel cerró el proceso — fue el último en entregar.</div>
+      <div class="pista"><div class="pista-n">PISTA 04</div>Andrés entregó justo después de quien hizo el Diagnóstico.</div>
+      <div class="pista"><div class="pista-n">PISTA 05</div>El Reporte fue entregado por quien ocupa el puesto del medio.</div>
+      <div class="pista"><div class="pista-n">PISTA 06</div>Marta no entregó ni el primero ni el último componente.</div>
+      <div class="pista"><div class="pista-n">PISTA 07</div>El Manual fue entregado justo antes del Cierre.</div>
+      <div class="pista"><div class="pista-n">PISTA 08</div>Helena entregó el Diagnóstico.</div>
+      <div class="pista"><div class="pista-n">PISTA 09</div>Sara no entregó el API ni el Cierre.</div>
+      <div class="pista"><div class="pista-n">PISTA 10</div>Las pistas 4 y 8 juntas te dicen más de lo que crees.</div>
+    </div>
+    <div class="inp-grp"><label class="inp-lbl">Escribe el orden:</label><textarea id="r4" rows="6" placeholder="1: Persona → Componente&#10;2: Persona → Componente&#10;3: Persona → Componente&#10;4: Persona → Componente&#10;5: Persona → Componente"></textarea></div>
+    <button class="btn btn-p" onclick="confirmar(4)">Confirmar →</button>
+  </div>
+</div>
+
+<!-- ═══ S5: LA HORMIGA ═══ -->
+<div class="screen" id="s5">
+  <div class="reto-content" id="rc5">
+    <div class="reto-hdr"><div class="reto-chip">RETO 05</div><div><div class="reto-title">La hormiga del pozo</div><div class="reto-sub">Confía en tu primer instinto... o no</div></div></div>
+    <div class="timer" id="tmr5"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv5">1:00</span></div>
+    <div class="scene" style="font-size:16px;line-height:1.85;text-align:center;padding:24px 20px;">Una hormiga cae a un pozo de <strong>30 metros</strong>.<br>Cada día sube <strong>3 metros</strong>.<br>Cada noche resbala <strong>2 metros</strong>.<br><br><strong>¿Cuántos días tarda en salir?</strong><br><span style="font-size:12px;color:var(--muted);">Solo el número.</span></div>
+    <div class="inp-grp"><input type="text" id="r5" placeholder="Tu respuesta..." autocomplete="off" inputmode="numeric"></div>
+    <button class="btn btn-p" id="btn5" onclick="checkAcertijo(5)">Confirmar →</button>
+    <div class="reveal-box" id="rev5">
+      <div class="rv-top"><span class="rv-icon" id="rvi5"></span><span class="rv-label" id="rvl5"></span></div>
+      <div class="rv-answer" id="rva5"></div>
+      <div class="rv-insight" id="rvins5"></div>
+      <button class="btn btn-p" style="margin-top:14px;" onclick="confirmar(5)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S6: EL MÉDICO ═══ -->
+<div class="screen" id="s6">
+  <div class="reto-content" id="rc6">
+    <div class="reto-hdr"><div class="reto-chip">RETO 06</div><div><div class="reto-title">El médico</div><div class="reto-sub">Pensamiento lateral · 1 minuto</div></div></div>
+    <div class="timer" id="tmr6"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv6">1:00</span></div>
+    <div class="scene" style="font-size:16px;line-height:1.85;text-align:center;padding:24px 20px;">Un padre y su hijo tienen un accidente de carro.<br>El padre muere en el acto.<br>El hijo llega al hospital y el médico dice:<br><br><em style="font-size:18px;">"No puedo operar a este niño.<br>Es mi hijo."</em><br><br><strong style="font-size:14px;color:var(--muted);">¿Cómo es posible?</strong></div>
+    <div class="inp-grp"><input type="text" id="r6" placeholder="Tu respuesta..." autocomplete="off"></div>
+    <button class="btn btn-p" id="btn6" onclick="checkAcertijo(6)">Confirmar →</button>
+    <div class="reveal-box" id="rev6">
+      <div class="rv-top"><span class="rv-icon" id="rvi6"></span><span class="rv-label" id="rvl6"></span></div>
+      <div class="rv-answer" id="rva6"></div>
+      <div class="rv-insight" id="rvins6"></div>
+      <button class="btn btn-p" style="margin-top:14px;" onclick="confirmar(6)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S7: EL ATAÚD ═══ -->
+<div class="screen" id="s7">
+  <div class="reto-content" id="rc7">
+    <div class="reto-hdr"><div class="reto-chip">RETO 07</div><div><div class="reto-title">Lo que nadie usa conscientemente</div><div class="reto-sub">Pensamiento lateral · 45 segundos</div></div></div>
+    <div class="timer" id="tmr7"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv7">0:45</span></div>
+    <div class="scene" style="font-size:17px;line-height:1.85;text-align:center;padding:28px 20px;">Los fabricantes lo crean para otras personas.<br>Los compradores no lo compran para ellos.<br>Y quienes lo usan, no saben que lo están usando.<br><br><strong style="font-size:14px;color:var(--muted);">¿Qué es?</strong></div>
+    <div class="inp-grp"><input type="text" id="r7" placeholder="Tu respuesta..." autocomplete="off"></div>
+    <button class="btn btn-p" id="btn7" onclick="checkAcertijo(7)">Confirmar →</button>
+    <div class="reveal-box" id="rev7">
+      <div class="rv-top"><span class="rv-icon" id="rvi7"></span><span class="rv-label" id="rvl7"></span></div>
+      <div class="rv-answer" id="rva7"></div>
+      <div class="rv-insight" id="rvins7"></div>
+      <button class="btn btn-p" style="margin-top:14px;" onclick="confirmar(7)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S8: EL LANZAMIENTO ═══ -->
+<div class="screen" id="s8">
+  <div class="reto-content" id="rc8">
+    <div class="reto-hdr"><div class="reto-chip">RETO 08</div><div><div class="reto-title">El lanzamiento del 70%</div><div class="reto-sub">Selecciona todo lo que harías</div></div></div>
+    <div class="timer" id="tmr8"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv8">1:30</span></div>
+    <div class="scene">Tu equipo debe lanzar una funcionalidad clave <strong>mañana a las 9 a.m.</strong> Tienes el <strong>70% de la información</strong> que necesitas. El 30% restante depende de otra área que no responde hace 2 días. Son las 6 p.m. de hoy.<br><br><em>Selecciona todo lo que harías.</em></div>
+    <ul class="opts" id="r8opts">
+      <li class="opt" onclick="toggleOpt(this,'A')"><div class="opt-box">✓</div>A — Espero a tener el 100% antes de decidir nada.</li>
+      <li class="opt" onclick="toggleOpt(this,'B')"><div class="opt-box">✓</div>B — Escalo a mi líder y espero sus instrucciones.</li>
+      <li class="opt" onclick="toggleOpt(this,'C')"><div class="opt-box">✓</div>C — Tomo la decisión con el 70% y documento los supuestos.</li>
+      <li class="opt" onclick="toggleOpt(this,'D')"><div class="opt-box">✓</div>D — Contacto al área que falta por todos los canales posibles.</li>
+      <li class="opt" onclick="toggleOpt(this,'E')"><div class="opt-box">✓</div>E — Propongo lanzar con lo que hay y preparo un plan de ajuste.</li>
+      <li class="opt" onclick="toggleOpt(this,'F')"><div class="opt-box">✓</div>F — Pospongo el lanzamiento hasta tener certeza completa.</li>
+      <li class="opt" onclick="toggleOpt(this,'G')"><div class="opt-box">✓</div>G — Hago un análisis de riesgo del 30% faltante.</li>
+      <li class="opt" onclick="toggleOpt(this,'H')"><div class="opt-box">✓</div>H — Busco si ese 30% fue resuelto antes en otro proyecto.</li>
+    </ul>
+    <button class="btn btn-p" style="margin-top:14px;" onclick="confirmar(8)">Confirmar y ver resultados →</button>
+  </div>
+</div>
+
+<!-- ═══ S9: CIERRE DWECK ═══ -->
+<div class="screen" id="s9">
+  <div class="reto-hdr"><div class="reto-chip">CIERRE</div><div><div class="reto-title">Para terminar</div><div class="reto-sub">3 preguntas · Sin tiempo · Solo honestidad</div></div></div>
+
+  <div class="card">
+    <div class="card-lbl">Pregunta 1 de 3 — Desafíos</div>
+    <p style="font-size:15px;color:var(--white);margin-bottom:6px;line-height:1.6;">Cuando llegué a un reto que no sabía cómo resolver, lo primero que pensé fue...</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige la que más se acerque a tu experiencia real</p>
+    <div class="grad-wrap" id="dq1">
+      <div class="grad-opt go1" onclick="selGrad('dq1',this,'1')"><div class="grad-dot"></div>"Esto no es para mí, claramente no tengo lo que se necesita."</div>
+      <div class="grad-opt go2" onclick="selGrad('dq1',this,'2')"><div class="grad-dot"></div>"Si no sé la respuesta rápido, mejor me salto esto."</div>
+      <div class="grad-opt go3" onclick="selGrad('dq1',this,'3')"><div class="grad-dot"></div>"No sé todavía, pero voy a intentarlo igual."</div>
+      <div class="grad-opt go4" onclick="selGrad('dq1',this,'4')"><div class="grad-dot"></div>"Un reto que no sé resolver es exactamente el que más me interesa."</div>
+    </div>
+    <div class="grad-legend"><span class="gl-fija">← Mentalidad fija</span><span class="gl-creci">Mentalidad de crecimiento →</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Pregunta 2 de 3 — Esfuerzo</div>
+    <p style="font-size:15px;color:var(--white);margin-bottom:6px;line-height:1.6;">Cuando me frustré en algún reto, lo que hice fue...</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige la que más se acerque a tu experiencia real</p>
+    <div class="grad-wrap" id="dq2">
+      <div class="grad-opt go1" onclick="selGrad('dq2',this,'1')"><div class="grad-dot"></div>Dejé la pregunta en blanco — si no sé, no sé.</div>
+      <div class="grad-opt go2" onclick="selGrad('dq2',this,'2')"><div class="grad-dot"></div>Escribí algo rápido solo para seguir avanzando.</div>
+      <div class="grad-opt go3" onclick="selGrad('dq2',this,'3')"><div class="grad-dot"></div>Me tomé un momento, intenté de nuevo aunque quedara incompleto.</div>
+      <div class="grad-opt go4" onclick="selGrad('dq2',this,'4')"><div class="grad-dot"></div>La frustración me activó — intenté más fuerte y busqué ayuda.</div>
+    </div>
+    <div class="grad-legend"><span class="gl-fija">← Mentalidad fija</span><span class="gl-creci">Mentalidad de crecimiento →</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Pregunta 3 de 3 — Autenticidad</div>
+    <p style="font-size:15px;color:var(--white);margin-bottom:6px;line-height:1.6;">Si supieras que tu resultado de hoy lo va a ver tu equipo, ¿cambiarías alguna respuesta?</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige la que más se acerque a tu experiencia real</p>
+    <div class="grad-wrap" id="dq3">
+      <div class="grad-opt go1" onclick="selGrad('dq3',this,'1')"><div class="grad-dot"></div>Sí, cambiaría varias — quiero que me vean bien.</div>
+      <div class="grad-opt go2" onclick="selGrad('dq3',this,'2')"><div class="grad-dot"></div>Cambiaría alguna por las dudas.</div>
+      <div class="grad-opt go3" onclick="selGrad('dq3',this,'3')"><div class="grad-dot"></div>Probablemente no, fui bastante honesto(a).</div>
+      <div class="grad-opt go4" onclick="selGrad('dq3',this,'4')"><div class="grad-dot"></div>No — respondí igual que respondería si nadie estuviera mirando.</div>
+    </div>
+    <div class="grad-legend"><span class="gl-fija">← Mentalidad fija</span><span class="gl-creci">Mentalidad de crecimiento →</span></div>
+  </div>
+
+  <button class="btn btn-p" onclick="showResults()">Ver mi resultado →</button>
+</div>
+
+<!-- ═══ S10: RESULTADOS ═══ -->
+<div class="screen" id="s10">
+  <div class="final-hero">
+    <span class="final-num" id="finalNum">0</span>
+    <span class="final-lbl">puntos de 800</span>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-lbl">Desglose por reto</div>
+    <div id="breakdown"></div>
+  </div>
+  <div class="atributo-final">
+    <div class="af-label">Atributo #1 de Redeban</div>
+    <div class="af-attr">🔄 Adaptabilidad al cambio</div>
+    <div class="af-text" id="afText"></div>
+    <div class="af-def">Capacidad de ajustarse a nuevas circunstancias, procesos o tecnologías con proactividad y aprendizaje continuo.<br><br><strong style="color:var(--white);">Apertura · Flexibilidad · Capacidad para el cambio · Aprendizaje activo · Maneja la ambigüedad · Resiliencia</strong></div>
+    <img src="https://www.redeban.com/sites/default/files/Logo.png" class="rb-final-logo" alt="Redeban" onerror="this.style.display='none'">
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+var D={nombre:'',area:'',scores:{},ans:{},zonaD:{},r8sel:[],dq:{},tmrInt:null,capa:1,screen:0};
+var TIMES={1:180,2:45,3:150,4:240,5:60,6:60,7:45,8:90};
+var RNAMES=['','Lista de verificación','Viernes 5:55 p.m.','Operación Rescate','El día del lanzamiento','La hormiga','El médico','El ataúd','El lanzamiento del 70%'];
+
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('s'+n).classList.add('active');
+  D.screen=n; window.scrollTo(0,0);
+  var pw=document.getElementById('progWrap');
+  if(n>=1&&n<=8){
+    pw.style.display='block';
+    var p=Math.round(n/8*100);
+    document.getElementById('progFill').style.width=p+'%';
+    document.getElementById('progPct').textContent=p+'%';
+    document.getElementById('progLbl').textContent='Reto '+n+' de 8';
+    document.getElementById('hdrReto').textContent=RNAMES[n]||'';
+  } else {pw.style.display='none';}
+}
+
+function startRally(){
+  var n=document.getElementById('inp_nombre').value.trim();
+  var a=document.getElementById('inp_area').value.trim();
+  if(!n||!a){showToast('Ingresa tu nombre y área primero 👆');return;}
+  D.nombre=n;D.area=a;
+  showScreen(1);
+  startTimer(1);
+}
+
+function startTimer(reto){
+  if(D.tmrInt) clearInterval(D.tmrInt);
+  var total=TIMES[reto],rem=total;
+  var el=document.getElementById('tv'+reto);
+  if(!el) return;
+  el.className='timer-val ok';
+  D.tmrInt=setInterval(function(){
+    rem--;
+    var m=Math.floor(rem/60),s=rem%60;
+    if(el) el.textContent=m+':'+(s<10?'0':'')+s;
+    if(rem<=10&&el){el.className='timer-val urgent';doFlash();}
+    if(rem<=0){clearInterval(D.tmrInt);autoAdv(reto);}
+  },1000);
+}
+
+function doFlash(){var f=document.getElementById('flash');f.classList.add('on');setTimeout(function(){f.classList.remove('on');},120);}
+
+function autoAdv(reto){
+  var o=document.getElementById('toOverlay');
+  document.getElementById('toMsg').textContent='Avanzando al siguiente reto...';
+  o.classList.add('show');
+  setTimeout(function(){
+    o.classList.remove('show');
+    if(reto===2&&D.capa<3){nextCapa(D.capa+1);}
+    else{
+      // For acertijos, show reveal then continue
+      if(reto===5||reto===6||reto===7){
+        var revEl=document.getElementById('rev'+reto);
+        if(revEl&&!revEl.classList.contains('show')){
+          checkAcertijo(reto,true);
+        } else { confirmar(reto,true); }
+      } else { confirmar(reto,true); }
+    }
+  },1800);
+}
+
+function nextCapa(to){
+  clearInterval(D.tmrInt);
+  D.capa=to;
+  ['c2_1','c2_2','c2_3'].forEach(function(id){document.getElementById(id).style.display='none';});
+  document.getElementById('c2_'+to).style.display='block';
+  document.getElementById('capaLbl').textContent=to;
+  startTimer(2);
+}
+
+function confirmar(reto,auto){
+  clearInterval(D.tmrInt);
+  saveAns(reto);calcScore(reto);
+  var next=reto+1;
+  var goNext=function(){
+    if(next>8){showScreen(9);}
+    else{showScreen(next);}
+  };
+  if(auto){setTimeout(goNext,0);return;}
+  setTimeout(function(){showMinicard(reto,goNext);},200);
+}
+
+function saveAns(r){
+  if(r===1)D.ans[1]=(document.getElementById('r1')||{}).value||'';
+  if(r===2){D.ans['2a']=(document.getElementById('r2a')||{}).value||'';D.ans['2b']=(document.getElementById('r2b')||{}).value||'';D.ans['2c']=(document.getElementById('r2c')||{}).value||'';}
+  if(r===4)D.ans[4]=(document.getElementById('r4')||{}).value||'';
+  if(r===5)D.ans[5]=(document.getElementById('r5')||{}).value||'';
+  if(r===6)D.ans[6]=(document.getElementById('r6')||{}).value||'';
+  if(r===7)D.ans[7]=(document.getElementById('r7')||{}).value||'';
+}
+
+function calcScore(r){
+  var p=0;
+  if(r===1){var v=(D.ans[1]||'').toLowerCase().trim();p=v.indexOf('autorizado')!==-1?100:(v.length>0?20:0);D.scores[1]=p;}
+  if(r===2){var a=D.ans['2a']||'',b=D.ans['2b']||'',c=D.ans['2c']||'';if(a.length>10)p+=30;if(b.length>10)p+=30;if(c.length>10)p+=40;D.scores[2]=p;}
+  if(r===3){var pts=0,correct={0:'c',1:'o',2:'c',3:'i',4:'o',5:'i'};for(var k in D.zonaD){pts+=10;if(D.zonaD[k]===correct[k])pts+=5;}D.scores[3]=Math.min(pts,100);}
+  if(r===4){var ans=(D.ans[4]||'').toLowerCase();var sol=[/helena.*diagnóstico|helena.*diagnostico/i,/andrés.*api|andres.*api/i,/sara.*reporte/i,/marta.*manual/i,/daniel.*cierre/i];var m=0;sol.forEach(function(rx){if(rx.test(ans))m++;});D.scores[4]=m*20;}
+  if(r===5){var n=parseInt((D.ans[5]||'').trim());p=n===28?100:(n===30?10:(n>0?20:0));D.scores[5]=p;}
+  if(r===6){var v6=(D.ans[6]||'').toLowerCase();p=(v6.indexOf('mamá')!==-1||v6.indexOf('mama')!==-1||v6.indexOf('madre')!==-1||v6.indexOf('mujer')!==-1)?100:(v6.length>0?15:0);D.scores[6]=p;}
+  if(r===7){var v7=(D.ans[7]||'').toLowerCase();p=(v7.indexOf('ataúd')!==-1||v7.indexOf('ataud')!==-1||v7.indexOf('féretro')!==-1||v7.indexOf('feretro')!==-1||v7.indexOf('cajón')!==-1||v7.indexOf('cajon')!==-1)?100:(v7.length>0?15:0);D.scores[7]=p;}
+  if(r===8){var s=D.r8sel,ab=['C','D','E','G','H'],bl=['A','B','F'],ac=0,bc=0;s.forEach(function(x){if(ab.indexOf(x)!==-1)ac++;if(bl.indexOf(x)!==-1)bc++;});p=ac>=3&&bc===0?100:(ac>=2&&bc<=1?70:(ac>=1?40:10));D.scores[8]=p;}
+  sendData();
+}
+
+/* ACERTIJOS CON REVEAL */
+function checkAcertijo(reto, forced){
+  clearInterval(D.tmrInt);
+  var inputEl=document.getElementById('r'+reto);
+  var val=(inputEl?inputEl.value:'').toLowerCase().trim();
+  var correct=false;
+  var revEl=document.getElementById('rev'+reto);
+  var answers={
+    5:{correct:['28'],check:function(v){return parseInt(v)===28;},correctMsg:'¡Correcto! 🎯',wrongMsg:'La respuesta es 28 días',correctInsight:'El primer instinto dice 30. Pero el día 28, la hormiga ya está en el metro 27 — sube 3 metros más y sale antes de que caiga la noche. Quienes llegaron a 28 cuestionaron su primer instinto. Eso es <em>flexibilidad</em>.',wrongInsight:'La trampa está en el día 28: la hormiga comienza desde el metro 27, sube 3 metros y llega a 30 — y sale antes del anochecer. El cerebro tiende a ir directo a 30 sin cuestionar. Eso es piloto automático.'},
+    6:{check:function(v){return v.indexOf('mamá')!==-1||v.indexOf('mama')!==-1||v.indexOf('madre')!==-1||v.indexOf('mujer')!==-1;},correctMsg:'¡Lo encontraste! 🎉',wrongMsg:'El médico es la mamá del niño',correctInsight:'Muchos se bloquean en este acertijo porque el cerebro asume automáticamente que el médico es hombre. Ese sesgo es inconsciente — y es exactamente el tipo de patrón que la <em>resiliencia cognitiva</em> nos invita a cuestionar.',wrongInsight:'El médico es la mamá del niño. La mayoría se bloquea porque el cerebro asume automáticamente que "médico" = hombre. Ese sesgo inconsciente es real — reconocerlo es el primer paso para superarlo.'},
+    7:{check:function(v){return v.indexOf('ataúd')!==-1||v.indexOf('ataud')!==-1||v.indexOf('féretro')!==-1||v.indexOf('feretro')!==-1||v.indexOf('cajón')!==-1||v.indexOf('cajon')!==-1;},correctMsg:'¡Exacto! 💡',wrongMsg:'La respuesta es un ataúd (féretro)',correctInsight:'Tu mente fue a un lugar que normalmente evitamos. Eso es pensamiento lateral en acción — la capacidad de ir donde la lógica no lleva. <em>Pensar diferente es una habilidad que se entrena.</em>',wrongInsight:'La respuesta es un ataúd. Los fabricantes lo hacen para otros, quien lo compra no lo usa para sí mismo, y quien lo "usa" no sabe que lo está usando. La incomodidad de este acertijo es intencional — nos saca de los patrones habituales.'}
+  };
+  var a=answers[reto];
+  correct=a.check(val);
+  D.ans[reto]=inputEl?inputEl.value:'';
+  // disable btn
+  var btn=document.getElementById('btn'+reto);
+  if(btn) btn.style.display='none';
+  // show reveal
+  document.getElementById('rvi'+reto).textContent=correct?'✅':'❌';
+  document.getElementById('rvl'+reto).textContent=correct?a.correctMsg:a.wrongMsg;
+  document.getElementById('rva'+reto).textContent='';
+  document.getElementById('rvins'+reto).innerHTML=correct?a.correctInsight:a.wrongInsight;
+  revEl.className='reveal-box show '+(correct?'correct':'wrong');
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+/* ZONA */
+var subQs={c:[{q:'¿Qué acción concreta tomas hoy?'}],i:[{q:'¿A quién contactas para moverlo?'}],o:[]};
+
+function zonaSelect(idx,type){
+  D.zonaD[idx]=type;
+  var ri=document.getElementById('ri'+idx);
+  ri.classList.remove('rescued','abandoned');
+  ri.classList.add(type==='o'?'abandoned':'rescued');
+  ri.querySelectorAll('.ri-btn').forEach(function(b){b.classList.remove('sel-c','sel-i','sel-o');});
+  var map={c:0,i:1,o:2};ri.querySelectorAll('.ri-btn')[map[type]].classList.add('sel-'+type);
+  // hide outside msg
+  document.getElementById('zom'+idx).classList.remove('show');
+  // show sub question
+  var sz=document.getElementById('sz'+idx);
+  var qs=subQs[type];
+  if(qs&&qs.length>0){
+    sz.innerHTML='<div class="sz-lbl">Una pregunta más</div>';
+    qs.forEach(function(q,qi){sz.innerHTML+='<div class="inp-grp" style="margin-bottom:8px;"><input type="text" id="szinp_'+idx+'_'+qi+'" placeholder="'+q.q+'" autocomplete="off"></div>';});
+    sz.classList.add('show');
+  } else {
+    sz.innerHTML=''; sz.classList.remove('show');
+  }
+  updateZonaScore();
+}
+
+function zonaSelectOut(idx){
+  D.zonaD[idx]='o';
+  var ri=document.getElementById('ri'+idx);
+  ri.classList.remove('rescued','abandoned');
+  ri.classList.add('abandoned');
+  ri.querySelectorAll('.ri-btn').forEach(function(b){b.classList.remove('sel-c','sel-i','sel-o');});
+  ri.querySelectorAll('.ri-btn')[2].classList.add('sel-o');
+  document.getElementById('sz'+idx).innerHTML='';
+  document.getElementById('sz'+idx).classList.remove('show');
+  document.getElementById('zom'+idx).classList.add('show');
+  updateZonaScore();
+}
+
+function updateZonaScore(){
+  var rescued=Object.values(D.zonaD).filter(function(v){return v!=='o';}).length;
+  document.getElementById('zonaScore').textContent=rescued;
+  document.getElementById('zonaMsg').textContent=rescued===0?'¡Clasifica para sumar!':(rescued===6?'¡Todo en tu zona de acción! 💪':rescued+' de 6 en tu zona de acción');
+}
+
+function toggleOpt(el,val){
+  el.classList.toggle('sel');
+  var i=D.r8sel.indexOf(val);
+  if(i===-1)D.r8sel.push(val);else D.r8sel.splice(i,1);
+}
+
+function selGrad(gid,el,val){
+  document.getElementById(gid).querySelectorAll('.grad-opt').forEach(function(o){o.classList.remove('sel');});
+  el.classList.add('sel');
+  D.dq[gid]=val;
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3500);
+}
+
+function buildPayload(){
+  var sz={};
+  for(var idx=0;idx<6;idx++){
+    if(D.zonaD[idx]){
+      sz['var_'+idx]={tipo:D.zonaD[idx]};
+      var inp=document.getElementById('szinp_'+idx+'_0');
+      if(inp) sz['var_'+idx].sub0=inp.value||'';
+      var zominp=document.getElementById('zominp'+idx);
+      if(zominp&&D.zonaD[idx]==='o') sz['var_'+idx].reflexion=zominp.value||'';
+    }
+  }
+  return {timestamp:new Date().toISOString(),nombre:D.nombre,area:D.area,scores:D.scores,total:Object.values(D.scores).reduce(function(a,b){return a+b;},0),r2a:D.ans['2a']||'',r2b:D.ans['2b']||'',r2c:D.ans['2c']||'',r4:D.ans[4]||'',r5:D.ans[5]||'',r6:D.ans[6]||'',r7:D.ans[7]||'',r8sel:D.r8sel.join(','),zona:sz,dq1:D.dq['dq1']||'',dq2:D.dq['dq2']||'',dq3:D.dq['dq3']||''};
+}
+
+function sendData(){
+  var url='https://script.google.com/macros/s/AKfycbxFhCY-ZJHVG-_o5LAmlgzbivkwJ8cUN5dXK_EkUERwQYRdMPxSbLGuHW7GGKMKcgbQ/exec';
+  if(url.indexOf('YOUR_')!==-1)return;
+  fetch(url,{method:'POST',body:JSON.stringify(buildPayload())}).catch(function(){});
+}
+
+
+/* ── CULTURAL MINI-CARD ── */
+var MC_DATA = {
+  1:{icon:'🌿',attr:'Apertura · Redeban',text:'Quien tiene la información completa antes de actuar, toma mejores decisiones. Eso es apertura.'},
+  2:{icon:'🌫️',attr:'Maneja la ambigüedad · Redeban',text:'No tenías toda la información — y actuaste igual. Eso es exactamente lo que este entorno exige.'},
+  3:{icon:'⭕',attr:'Capacidad para el cambio · Redeban',text:'Tu zona de acción es más grande de lo que el primer instinto te dice. Especialmente bajo presión.'},
+  4:{icon:'📚',attr:'Aprendizaje activo · Redeban',text:'Pedir ayuda no es debilidad — es inteligencia colectiva. Los que colaboraron hoy lo saben.'},
+  5:{icon:'🌊',attr:'Flexibilidad · Redeban',text:'El primer instinto dice 30. La mente flexible cuestiona y llega a 28. ¿Cuestionaste el tuyo?'},
+  6:{icon:'💡',attr:'Resiliencia · Redeban',text:'La respuesta estaba donde no la estabas buscando. Tolerar esa incomodidad es parte del crecimiento.'},
+  7:{icon:'🔄',attr:'Adaptabilidad al cambio · Redeban',text:'Pensar diferente es una habilidad que se entrena. Cada patrón que rompes te hace más ágil.'},
+  8:{icon:'🔄',attr:'Adaptabilidad al cambio · Redeban',text:'Actuar con el 70% no es imprudencia — es la agilidad que Redeban necesita para construir país.'}
+};
+var _mcNext = null;
+
+function showMinicard(reto, nextFn) {
+  var d = MC_DATA[reto];
+  if (!d) { nextFn(); return; }
+  _mcNext = nextFn;
+  document.getElementById('mcIcon').textContent = d.icon;
+  document.getElementById('mcAttr').textContent = d.attr;
+  document.getElementById('mcText').textContent = d.text;
+  var w = document.getElementById('mcWrap');
+  w.style.display = 'block';
+  w.style.animation = 'none';
+  w.offsetHeight;
+  w.style.animation = 'slideUp .35s cubic-bezier(.4,0,.2,1)';
+}
+
+function mcContinue() {
+  document.getElementById('mcWrap').style.display = 'none';
+  if (_mcNext) { var fn = _mcNext; _mcNext = null; fn(); }
+}
+
+function showResults(){
+  var total=Object.values(D.scores).reduce(function(a,b){return a+b;},0);
+  document.getElementById('finalNum').textContent=total;
+  var names={1:'Lista de verificación',2:'Viernes 5:55 p.m.',3:'Operación Rescate',4:'El día del lanzamiento',5:'La hormiga',6:'El médico',7:'El ataúd',8:'El lanzamiento del 70%'};
+  var bd=document.getElementById('breakdown');bd.innerHTML='';
+  for(var i=1;i<=8;i++){var sc=D.scores[i]||0;var cls=sc>=80?'pt-g':(sc>=40?'pt-p':'pt-z');bd.innerHTML+='<div class="bd-item"><span class="bd-name">'+names[i]+'</span><span class="bd-pt '+cls+'">'+sc+'/100</span></div>';}
+  var msgs=['Cada decisión que tomaste hoy refleja la mentalidad con la que navegarás el cambio en Redeban. No hay resultado perfecto — hay aprendizaje continuo.','La forma en que respondiste bajo presión dice más sobre tu agilidad que cualquier respuesta correcta. Eso es adaptabilidad en acción.','Hoy pusiste a prueba seis comportamientos de Adaptabilidad al cambio. El que más activaste es tu punto de partida para seguir creciendo.'];
+  document.getElementById('afText').textContent=msgs[total>500?0:(total>300?1:2)];
+  sendData();
+  showScreen(10);
+}
+</script>
+
+<!-- MINI-CARD CULTURAL -->
+<div class="mc-wrap" id="mcWrap" style="display:none;">
+  <div class="mc-inner">
+    <span class="mc-icon" id="mcIcon"></span>
+    <div class="mc-body">
+      <div class="mc-attr" id="mcAttr"></div>
+      <div class="mc-text" id="mcText"></div>
+    </div>
+    <button class="mc-btn" id="mcBtn" onclick="mcContinue()">Continuar →</button>
+  </div>
+</div>
+
+</body>
+</html>

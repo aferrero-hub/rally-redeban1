@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSprint · Centro de Control · Redeban</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #04122e;
+  --navy2:   #071b45;
+  --navy3:   #0a2260;
+  --teal:    #00b89c;
+  --teal2:   #00e8c6;
+  --white:   #eef2fb;
+  --muted:   #5b7296;
+  --border:  rgba(0,184,156,0.15);
+  --card:    rgba(7,27,69,0.7);
+  --glow:    rgba(0,184,156,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--navy);
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ── GRID BACKGROUND ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,184,156,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,184,156,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+/* Radial glow center */
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 600px;
+  background: radial-gradient(ellipse at center, rgba(0,184,156,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── LAYOUT ── */
+.root {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-rows: 64px 1fr;
+  height: 100vh;
+  padding: 0;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(4,18,46,0.9);
+  backdrop-filter: blur(12px);
+}
+
+.hdr-left {
+  display: flex; align-items: center; gap: 20px;
+}
+
+.rb-logo {
+  height: 22px;
+  filter: brightness(0) invert(1);
+  opacity: .9;
+}
+
+.hdr-divider {
+  width: 1px; height: 22px;
+  background: var(--border);
+}
+
+.hdr-title {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.hdr-right {
+  display: flex; align-items: center; gap: 24px;
+}
+
+.live-badge {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10px; color: var(--teal);
+  text-transform: uppercase; letter-spacing: .1em;
+  font-family: 'DM Mono', monospace;
+}
+
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--teal);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .4; transform: scale(.7); }
+}
+
+.clock {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: .06em;
+}
+
+.next-refresh {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+
+/* ── MAIN GRID ── */
+main {
+  display: grid;
+  grid-template-columns: 340px 1fr 320px;
+  grid-template-rows: 1fr 1fr;
+  gap: 16px;
+  padding: 20px 28px 20px;
+  min-height: 0;
+}
+
+/* ── CARD BASE ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  opacity: .5;
+}
+
+.card-label {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin-bottom: 12px;
+}
+
+/* ── KPI: SCORE ── */
+.kpi-score {
+  grid-column: 1;
+  grid-row: 1;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-color: rgba(0,184,156,0.25);
+  background: linear-gradient(160deg, rgba(0,184,156,0.07), rgba(7,27,69,0.8));
+}
+
+.kpi-score::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: 50%; transform: translateX(-50%);
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,184,156,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.score-num {
+  font-size: clamp(72px, 8vw, 110px);
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+  transition: all .6s ease;
+}
+
+.score-sub {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-family: 'DM Mono', monospace;
+}
+
+.score-max {
+  font-size: 10px;
+  color: rgba(91,114,150,0.6);
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── KPI: PARTICIPANTS ── */
+.kpi-count {
+  grid-column: 1;
+  grid-row: 2;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.count-num {
+  font-size: clamp(52px, 5vw, 80px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--white);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+  transition: all .6s ease;
+}
+
+.count-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── MINDSET ── */
+.mindset-card {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.mindset-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.mindset-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  font-family: 'DM Mono', monospace;
+}
+
+.mindset-block {
+  margin-bottom: 28px;
+}
+
+.mindset-block:last-child {
+  margin-bottom: 0;
+}
+
+.mb-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.mb-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.mb-pct {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--teal2);
+  font-variant-numeric: tabular-nums;
+  font-family: 'DM Mono', monospace;
+  transition: all .6s ease;
+}
+
+.mb-track {
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.mb-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 12px rgba(0,184,156,0.4);
+}
+
+.mb-fill.secondary {
+  background: linear-gradient(90deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+  box-shadow: none;
+}
+
+.mb-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .04em;
+}
+
+.mindset-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* ── COMBINED DQ BAR CHART ── */
+.dq-combined {
+  margin-top: 20px;
+}
+
+.dq-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.dq-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  min-width: 52px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.dq-bar-wrap {
+  flex: 1;
+  height: 28px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dq-bar {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  font-family: 'DM Mono', monospace;
+  min-width: 36px;
+  box-shadow: 0 0 10px rgba(0,184,156,0.3);
+}
+
+.dq-pct-out {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal);
+  font-family: 'DM Mono', monospace;
+  min-width: 40px;
+  text-align: right;
+  transition: all .6s ease;
+}
+
+/* ── TOP 5 ── */
+.top5-card {
+  grid-column: 3;
+  grid-row: 1 / 3;
+}
+
+.top5-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.top5-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  font-family: 'DM Mono', monospace;
+}
+
+.top5-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.top5-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all .4s ease;
+  animation: slideIn .4s ease both;
+}
+
+.top5-item:nth-child(1) { animation-delay: .05s; }
+.top5-item:nth-child(2) { animation-delay: .10s; }
+.top5-item:nth-child(3) { animation-delay: .15s; }
+.top5-item:nth-child(4) { animation-delay: .20s; }
+.top5-item:nth-child(5) { animation-delay: .25s; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.top5-item:first-child {
+  border-color: rgba(0,184,156,0.3);
+  background: rgba(0,184,156,0.06);
+}
+
+.top5-rank {
+  font-size: 11px;
+  font-weight: 800;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  min-width: 22px;
+  text-align: center;
+}
+
+.top5-item:first-child .top5-rank {
+  color: var(--teal2);
+}
+
+.top5-medal {
+  font-size: 18px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.top5-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top5-area {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.top5-score {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--teal);
+  font-family: 'DM Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
+}
+
+.top5-item:first-child .top5-score {
+  color: var(--teal2);
+}
+
+/* ── SCORE BAR in top5 ── */
+.top5-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.top5-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  text-align: center;
+  opacity: .6;
+}
+
+.empty-icon {
+  font-size: 32px;
+  opacity: .4;
+}
+
+/* ── LAST UPDATED ── */
+.last-updated {
+  position: absolute;
+  bottom: 14px;
+  right: 20px;
+  font-size: 9px;
+  color: rgba(91,114,150,0.5);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .06em;
+}
+
+/* ── LOADING OVERLAY ── */
+.loading {
+  position: fixed; inset: 0; z-index: 900;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: opacity .5s ease;
+}
+
+.loading.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-logo {
+  height: 30px;
+  filter: brightness(0) invert(1);
+  opacity: .7;
+  margin-bottom: 10px;
+}
+
+.loading-ring {
+  width: 48px; height: 48px;
+  border: 3px solid rgba(0,184,156,0.15);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ── ERROR TOAST ── */
+.error-toast {
+  position: fixed;
+  bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: rgba(255,82,82,0.12);
+  border: 1px solid rgba(255,82,82,0.25);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 12px;
+  color: #ff8a8a;
+  font-family: 'DM Mono', monospace;
+  z-index: 800;
+  transition: transform .3s ease;
+}
+
+.error-toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── SCAN LINE EFFECT ── */
+.scanline {
+  position: fixed; inset: 0; z-index: 2;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.015) 2px,
+    rgba(0,0,0,0.015) 4px
+  );
+  pointer-events: none;
+}
+
+/* ── CORNER DECORATIONS ── */
+.corner {
+  position: fixed;
+  width: 24px; height: 24px;
+  z-index: 3;
+  pointer-events: none;
+}
+.corner-tl { top: 8px; left: 8px; border-top: 2px solid var(--teal); border-left: 2px solid var(--teal); }
+.corner-tr { top: 8px; right: 8px; border-top: 2px solid var(--teal); border-right: 2px solid var(--teal); }
+.corner-bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--teal); border-left: 2px solid var(--teal); }
+.corner-br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--teal); border-right: 2px solid var(--teal); }
+
+/* ── RESPONSIVE TWEAKS ── */
+@media (max-height: 700px) {
+  .score-num { font-size: 72px; }
+  .count-num { font-size: 52px; }
+  main { gap: 10px; padding: 12px 20px; }
+  .card { padding: 16px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <img src="https://www.redeban.com/sites/default/files/Logo.png" class="loading-logo" alt="Redeban" onerror="this.style.display='none'">
+  <div class="loading-ring"></div>
+  <div class="loading-text">Conectando con el rally…</div>
+</div>
+
+<div class="error-toast" id="errorToast">⚠ Error al conectar. Reintentando…</div>
+
+<div class="root">
+
+  <!-- HEADER -->
+  <header>
+    <div class="hdr-left">
+      <img src="https://www.redeban.com/sites/default/files/Logo.png" class="rb-logo" alt="Redeban" onerror="this.style.display='none'">
+      <div class="hdr-divider"></div>
+      <span class="hdr-title">MindSprint · Centro de Control</span>
+    </div>
+    <div class="hdr-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span>En vivo</span>
+      </div>
+      <span class="clock" id="clock">--:--:--</span>
+      <span class="next-refresh" id="nextRefresh">↻ en 15s</span>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- KPI: PUNTAJE PROMEDIO -->
+    <div class="card kpi-score">
+      <div class="card-label">Puntaje promedio general</div>
+      <div class="score-num" id="avgScore">—</div>
+      <div class="score-sub">de 800 puntos</div>
+      <div class="score-max" id="scoreRange">&nbsp;</div>
+      <div class="last-updated" id="upd1"></div>
+    </div>
+
+    <!-- KPI: PARTICIPANTES -->
+    <div class="card kpi-count">
+      <div class="card-label">Participantes finalizados</div>
+      <div class="count-num" id="totalPart">—</div>
+      <div class="count-label">colaboradores</div>
+      <div class="last-updated" id="upd2"></div>
+    </div>
+
+    <!-- MINDSET CARD -->
+    <div class="card mindset-card">
+      <div class="card-label">Análisis de mentalidad · Preguntas de cierre</div>
+      <div class="mindset-title">Distribución de respuestas</div>
+      <div class="mindset-subtitle">opciones 3–4 = apertura · opciones 1–2 = resistencia</div>
+
+      <!-- DQ bars -->
+      <div class="dq-combined">
+        <div class="dq-row">
+          <div class="dq-label">Pregunta 1</div>
+          <div class="dq-bar-wrap">
+            <div class="dq-bar" id="dq1bar" style="width:0%">—</div>
+          </div>
+          <div class="dq-pct-out" id="dq1pct">—</div>
+        </div>
+        <div class="dq-row">
+          <div class="dq-label">Pregunta 2</div>
+          <div class="dq-bar-wrap">
+            <div class="dq-bar" id="dq2bar" style="width:0%">—</div>
+          </div>
+          <div class="dq-pct-out" id="dq2pct">—</div>
+        </div>
+        <div class="dq-row">
+          <div class="dq-label">Pregunta 3</div>
+          <div class="dq-bar-wrap">
+            <div class="dq-bar" id="dq3bar" style="width:0%">—</div>
+          </div>
+          <div class="dq-pct-out" id="dq3pct">—</div>
+        </div>
+      </div>
+
+      <div class="mindset-divider"></div>
+
+      <!-- Aggregated mindset -->
+      <div class="mindset-block">
+        <div class="mb-header">
+          <div class="mb-name">Apertura de mentalidad</div>
+          <div class="mb-pct" id="growthPct">—%</div>
+        </div>
+        <div class="mb-track">
+          <div class="mb-fill" id="growthBar" style="width:0%"></div>
+        </div>
+        <div class="mb-detail">
+          <span>Opciones 3 ó 4 en preguntas de cierre</span>
+          <span id="growthCount">0 resp.</span>
+        </div>
+      </div>
+
+      <div class="mindset-block">
+        <div class="mb-header">
+          <div class="mb-name">Resistencia al cambio</div>
+          <div class="mb-pct" id="fixedPct">—%</div>
+        </div>
+        <div class="mb-track">
+          <div class="mb-fill secondary" id="fixedBar" style="width:0%"></div>
+        </div>
+        <div class="mb-detail">
+          <span>Opciones 1 ó 2 en preguntas de cierre</span>
+          <span id="fixedCount">0 resp.</span>
+        </div>
+      </div>
+
+      <div class="last-updated" id="upd3"></div>
+    </div>
+
+    <!-- TOP 5 -->
+    <div class="card top5-card">
+      <div class="card-label">Ranking de agilidad</div>
+      <div class="top5-title">Top 5 · Mayor puntaje</div>
+      <div class="top5-subtitle">Workshop #1 — Adaptabilidad al cambio</div>
+      <ul class="top5-list" id="top5list">
+        <li class="empty-state">
+          <div class="empty-icon">⏳</div>
+          Esperando datos…
+        </li>
+      </ul>
+      <div class="last-updated" id="upd4"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxFhCY-ZJHVG-_o5LAmlgzbivkwJ8cUN5dXK_EkUERwQYRdMPxSbLGuHW7GGKMKcgbQ/exec';
+const REFRESH_INTERVAL = 15; // seconds
+
+let countdown = REFRESH_INTERVAL;
+let firstLoad = true;
+
+// ── CLOCK ──────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── COUNTDOWN ──────────────────────────────────────────
+function tickCountdown() {
+  countdown--;
+  if (countdown <= 0) {
+    countdown = REFRESH_INTERVAL;
+    loadData();
+  }
+  document.getElementById('nextRefresh').textContent = `↻ en ${countdown}s`;
+}
+setInterval(tickCountdown, 1000);
+
+// ── HELPERS ────────────────────────────────────────────
+function animNum(el, target, duration = 700) {
+  const start = parseFloat(el.textContent) || 0;
+  const startTime = performance.now();
+  function step(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(start + (target - start) * ease);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorToast');
+  el.textContent = `⚠ ${msg}`;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function timestamp() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+}
+
+function setUpdated(ids) {
+  const t = `↻ ${timestamp()}`;
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t;
+  });
+}
+
+// ── DATA LOAD ──────────────────────────────────────────
+async function loadData() {
+  try {
+    const res = await fetch(GAS_URL + '?action=getData&t=' + Date.now());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    // Accept both {rows:[...]} and direct array
+    const rows = Array.isArray(json) ? json : (json.rows || []);
+
+    render(rows);
+
+    if (firstLoad) {
+      document.getElementById('loading').classList.add('hide');
+      firstLoad = false;
+    }
+  } catch (err) {
+    console.error('Fetch error:', err);
+    showError('Error al conectar. Reintentando en ' + countdown + 's');
+    if (firstLoad) {
+      // Still hide loading after 3s on error
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hide');
+        firstLoad = false;
+      }, 3000);
+    }
+  }
+}
+
+// ── RENDER ─────────────────────────────────────────────
+function render(rows) {
+  if (!rows || rows.length === 0) {
+    setUpdated(['upd1','upd2','upd3','upd4']);
+    return;
+  }
+
+  // ── 1. Puntaje promedio ──
+  const totals = rows.map(r => parseFloat(r.total) || 0);
+  const avg = totals.reduce((a,b) => a+b, 0) / totals.length;
+  const maxScore = Math.max(...totals);
+  const minScore = Math.min(...totals);
+
+  const avgEl = document.getElementById('avgScore');
+  animNum(avgEl, Math.round(avg));
+
+  document.getElementById('scoreRange').textContent =
+    `Rango: ${minScore} – ${maxScore} pts`;
+
+  // ── 2. Participantes ──
+  animNum(document.getElementById('totalPart'), rows.length);
+
+  // ── 3. Mentalidad ──
+  const dqs = ['dq1','dq2','dq3'];
+  let totalGrowth = 0, totalFixed = 0, totalDQ = 0;
+
+  dqs.forEach((key, i) => {
+    const vals = rows.map(r => parseInt(r[key]) || 0).filter(v => v > 0);
+    if (vals.length === 0) {
+      setBarPct('dq'+(i+1)+'bar', 'dq'+(i+1)+'pct', 0, '—');
+      return;
+    }
+    const growth = vals.filter(v => v >= 3).length;
+    const pct = Math.round((growth / vals.length) * 100);
+    setBarPct('dq'+(i+1)+'bar', 'dq'+(i+1)+'pct', pct, pct+'%');
+    totalGrowth += growth;
+    totalFixed += (vals.length - growth);
+    totalDQ += vals.length;
+  });
+
+  const growthPct = totalDQ > 0 ? Math.round((totalGrowth / totalDQ) * 100) : 0;
+  const fixedPct  = totalDQ > 0 ? Math.round((totalFixed  / totalDQ) * 100) : 0;
+
+  document.getElementById('growthPct').textContent = growthPct + '%';
+  document.getElementById('growthBar').style.width  = growthPct + '%';
+  document.getElementById('growthCount').textContent = totalGrowth + ' resp.';
+
+  document.getElementById('fixedPct').textContent  = fixedPct  + '%';
+  document.getElementById('fixedBar').style.width   = fixedPct  + '%';
+  document.getElementById('fixedCount').textContent = totalFixed + ' resp.';
+
+  // ── 4. Top 5 ──
+  const sorted = [...rows]
+    .sort((a,b) => (parseFloat(b.total)||0) - (parseFloat(a.total)||0))
+    .slice(0, 5);
+
+  const medals = ['🥇','🥈','🥉','',''];
+  const list = document.getElementById('top5list');
+  list.innerHTML = '';
+
+  sorted.forEach((r, i) => {
+    const score = parseFloat(r.total) || 0;
+    const barPct = Math.round((score / 800) * 100);
+    const li = document.createElement('li');
+    li.className = 'top5-item';
+    li.innerHTML = `
+      <div class="top5-rank">#${i+1}</div>
+      <div class="top5-medal">${medals[i] || ''}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="top5-name">${escapeHtml(r.nombre || '—')}</div>
+        <div class="top5-area">${escapeHtml(r.area || '')}</div>
+        <div class="top5-bar"><div class="top5-bar-fill" style="width:${barPct}%"></div></div>
+      </div>
+      <div class="top5-score">${score}</div>`;
+    list.appendChild(li);
+  });
+
+  setUpdated(['upd1','upd2','upd3','upd4']);
+}
+
+function setBarPct(barId, pctId, pct, label) {
+  const bar = document.getElementById(barId);
+  const pctEl = document.getElementById(pctId);
+  bar.style.width = pct + '%';
+  bar.textContent = pct > 15 ? label : '';
+  pctEl.textContent = label;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── INIT ───────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>

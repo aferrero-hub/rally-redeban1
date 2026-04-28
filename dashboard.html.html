@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSprint · Centro de Control · Redeban</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #04122e;
+  --navy2:  #071b45;
+  --teal:   #00b89c;
+  --teal2:  #00e8c6;
+  --white:  #eef2fb;
+  --muted:  #5b7296;
+  --border: rgba(0,184,156,0.15);
+  --card:   rgba(7,27,69,0.72);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--navy);
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* grid texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,184,156,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,184,156,0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  pointer-events: none;
+}
+body::after {
+  content: '';
+  position: fixed;
+  top: -10%; left: 50%; transform: translateX(-50%);
+  width: 1000px; height: 500px;
+  background: radial-gradient(ellipse, rgba(0,184,156,0.05) 0%, transparent 68%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── ROOT ── */
+.root {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-rows: 58px 1fr;
+  height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(4,18,46,0.92);
+  backdrop-filter: blur(14px);
+  position: relative; z-index: 10;
+}
+.hdr-left { display: flex; align-items: center; gap: 18px; }
+.rb-logo { height: 20px; filter: brightness(0) invert(1); opacity: .92; }
+.hdr-pipe { width: 1px; height: 20px; background: var(--border); }
+.hdr-title { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+.hdr-right { display: flex; align-items: center; gap: 22px; }
+.live-badge { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--teal); text-transform: uppercase; letter-spacing: .1em; font-family: 'DM Mono', monospace; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: blink 1.6s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.clock { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted); letter-spacing: .06em; }
+.next-ref { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+
+/* ── MAIN 3-COL GRID ── */
+main {
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  gap: 14px;
+  padding: 16px 24px 16px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  opacity: .45;
+}
+.card-label {
+  font-size: 9px; font-family: 'DM Mono', monospace;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .14em;
+  margin-bottom: 10px;
+}
+.last-upd {
+  position: absolute; bottom: 10px; right: 14px;
+  font-size: 8px; color: rgba(91,114,150,0.45);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── LEFT COLUMN: KPI stack ── */
+.col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* KPI: score */
+.kpi-score {
+  flex: 1;
+  justify-content: center; align-items: center; text-align: center;
+  border-color: rgba(0,184,156,0.28);
+  background: linear-gradient(160deg, rgba(0,184,156,0.08), rgba(7,27,69,0.85));
+}
+.kpi-score::after {
+  content: '';
+  position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,184,156,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.score-num {
+  font-size: clamp(68px, 7vw, 96px);
+  font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-variant-numeric: tabular-nums;
+  transition: all .6s ease;
+  margin-bottom: 4px;
+}
+.score-of { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-family: 'DM Mono', monospace; }
+.score-range { font-size: 10px; color: rgba(91,114,150,0.55); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+/* KPI: count */
+.kpi-count {
+  flex: 1;
+  justify-content: center; align-items: center; text-align: center;
+}
+.count-num {
+  font-size: clamp(52px, 5vw, 72px);
+  font-weight: 800; line-height: 1; color: var(--white);
+  font-variant-numeric: tabular-nums;
+  transition: all .6s ease;
+  margin-bottom: 4px;
+}
+.count-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-family: 'DM Mono', monospace; }
+
+/* ── CENTER COLUMN: Question breakdown ── */
+.col-center {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.col-center::-webkit-scrollbar { display: none; }
+
+.q-card {
+  flex-shrink: 0;
+}
+
+.q-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.q-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.q-option:last-child { margin-bottom: 0; }
+
+.q-opt-label {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--teal);
+  font-weight: 700;
+  min-width: 16px;
+  letter-spacing: .04em;
+}
+
+.q-opt-text {
+  font-size: 12px;
+  color: #a8c0d8;
+  flex: 1;
+  line-height: 1.35;
+}
+
+.q-bar-wrap {
+  width: 120px;
+  flex-shrink: 0;
+  height: 20px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.q-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 8px rgba(0,184,156,0.25);
+}
+
+.q-pct {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--teal2);
+  font-family: 'DM Mono', monospace;
+  min-width: 38px;
+  text-align: right;
+  transition: all .5s ease;
+}
+
+.q-count-badge {
+  position: absolute;
+  bottom: 10px; right: 14px;
+  font-size: 9px;
+  color: rgba(91,114,150,0.5);
+  font-family: 'DM Mono', monospace;
+}
+
+/* highlight the leading option */
+.q-option.leader .q-opt-text { color: var(--white); }
+.q-option.leader .q-pct { color: var(--teal2); }
+.q-option.leader .q-bar { box-shadow: 0 0 12px rgba(0,184,156,0.5); }
+
+/* ── RIGHT COLUMN: Top 5 ── */
+.col-right {}
+
+.top5-hdr { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+.top5-sub { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 16px; }
+
+.top5-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+
+.top5-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  animation: slideIn .4s ease both;
+}
+.top5-item:nth-child(1){animation-delay:.04s;}
+.top5-item:nth-child(2){animation-delay:.08s;}
+.top5-item:nth-child(3){animation-delay:.12s;}
+.top5-item:nth-child(4){animation-delay:.16s;}
+.top5-item:nth-child(5){animation-delay:.20s;}
+@keyframes slideIn { from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:translateX(0);} }
+
+.top5-item:first-child {
+  border-color: rgba(0,184,156,0.3);
+  background: rgba(0,184,156,0.06);
+}
+
+.top5-rank { font-size: 11px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--muted); min-width: 20px; text-align: center; }
+.top5-item:first-child .top5-rank { color: var(--teal2); }
+.top5-medal { font-size: 16px; min-width: 20px; text-align: center; }
+.t5-info { flex: 1; min-width: 0; }
+.top5-name { font-size: 13px; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top5-area { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t5-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.t5-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--teal), var(--teal2)); transition: width .8s cubic-bezier(.4,0,.2,1); }
+.top5-score { font-size: 18px; font-weight: 800; color: var(--teal); font-family: 'DM Mono', monospace; min-width: 36px; text-align: right; }
+.top5-item:first-child .top5-score { color: var(--teal2); }
+
+.empty-state {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px; color: var(--muted);
+  font-size: 12px; font-family: 'DM Mono', monospace; opacity: .55;
+}
+
+/* ── LOADING ── */
+.loading {
+  position: fixed; inset: 0; z-index: 900;
+  background: var(--navy);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  transition: opacity .5s ease;
+}
+.loading.hide { opacity: 0; pointer-events: none; }
+.loading-logo { height: 28px; filter: brightness(0) invert(1); opacity: .7; margin-bottom: 6px; }
+.loading-ring { width: 44px; height: 44px; border: 3px solid rgba(0,184,156,0.14); border-top-color: var(--teal); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg);} }
+.loading-text { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+
+/* ── ERROR TOAST ── */
+.err-toast {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: rgba(255,82,82,0.1); border: 1px solid rgba(255,82,82,0.22);
+  border-radius: 8px; padding: 9px 18px; font-size: 11px; color: #ff9090;
+  font-family: 'DM Mono', monospace; z-index: 800; transition: transform .3s ease;
+}
+.err-toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── CORNERS ── */
+.corner { position: fixed; width: 20px; height: 20px; z-index: 3; pointer-events: none; }
+.corner-tl { top: 7px; left: 7px; border-top: 2px solid var(--teal); border-left: 2px solid var(--teal); }
+.corner-tr { top: 7px; right: 7px; border-top: 2px solid var(--teal); border-right: 2px solid var(--teal); }
+.corner-bl { bottom: 7px; left: 7px; border-bottom: 2px solid var(--teal); border-left: 2px solid var(--teal); }
+.corner-br { bottom: 7px; right: 7px; border-bottom: 2px solid var(--teal); border-right: 2px solid var(--teal); }
+
+/* scan lines */
+.scanline { position: fixed; inset: 0; z-index: 2; background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.012) 2px,rgba(0,0,0,0.012) 4px); pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<div class="loading" id="loading">
+  <img src="https://www.redeban.com/sites/default/files/Logo.png" class="loading-logo" alt="Redeban" onerror="this.style.display='none'">
+  <div class="loading-ring"></div>
+  <div class="loading-text">Conectando con el rally…</div>
+</div>
+
+<div class="err-toast" id="errToast"></div>
+
+<div class="root">
+
+  <header>
+    <div class="hdr-left">
+      <img src="https://www.redeban.com/sites/default/files/Logo.png" class="rb-logo" alt="Redeban" onerror="this.style.display='none'">
+      <div class="hdr-pipe"></div>
+      <span class="hdr-title">MindSprint · Centro de Control</span>
+    </div>
+    <div class="hdr-right">
+      <div class="live-badge"><div class="live-dot"></div><span>En vivo</span></div>
+      <span class="clock" id="clock">--:--:--</span>
+      <span class="next-ref" id="nextRef">↻ en 15s</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- LEFT: KPIs -->
+    <div class="col-left">
+
+      <div class="card kpi-score">
+        <div class="card-label">Puntaje promedio general</div>
+        <div class="score-num" id="avgScore">—</div>
+        <div class="score-of">de 800 puntos</div>
+        <div class="score-range" id="scoreRange">&nbsp;</div>
+        <div class="last-upd" id="upd1"></div>
+      </div>
+
+      <div class="card kpi-count">
+        <div class="card-label">Participantes finalizados</div>
+        <div class="count-num" id="totalPart">—</div>
+        <div class="count-lbl">colaboradores</div>
+        <div class="last-upd" id="upd2"></div>
+      </div>
+
+    </div>
+
+    <!-- CENTER: Question breakdowns -->
+    <div class="col-center">
+
+      <!-- Q1 -->
+      <div class="card q-card">
+        <div class="card-label">Pregunta 1 de 3 · Desafíos</div>
+        <div class="q-text">Cuando llegué a una pregunta que no sabía cómo resolver, lo primero que pensé fue…</div>
+        <div class="q-option" id="dq1_o1">
+          <div class="q-opt-label">a.</div>
+          <div class="q-opt-text">"Esto no es para mí, claramente no tengo lo que se necesita."</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq1b1" style="width:0%"></div></div>
+          <div class="q-pct" id="dq1p1">—</div>
+        </div>
+        <div class="q-option" id="dq1_o2">
+          <div class="q-opt-label">b.</div>
+          <div class="q-opt-text">"Si no sé la respuesta rápido, mejor me salto esto."</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq1b2" style="width:0%"></div></div>
+          <div class="q-pct" id="dq1p2">—</div>
+        </div>
+        <div class="q-option" id="dq1_o3">
+          <div class="q-opt-label">c.</div>
+          <div class="q-opt-text">"No sé todavía, pero voy a intentarlo igual."</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq1b3" style="width:0%"></div></div>
+          <div class="q-pct" id="dq1p3">—</div>
+        </div>
+        <div class="q-option" id="dq1_o4">
+          <div class="q-opt-label">d.</div>
+          <div class="q-opt-text">"Una pregunta que no sé resolver es exactamente la que más me interesa."</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq1b4" style="width:0%"></div></div>
+          <div class="q-pct" id="dq1p4">—</div>
+        </div>
+        <div class="q-count-badge" id="dq1total"></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="card q-card">
+        <div class="card-label">Pregunta 2 de 3 · Esfuerzo</div>
+        <div class="q-text">Cuando me frustré en alguna pregunta, lo que hice fue…</div>
+        <div class="q-option" id="dq2_o1">
+          <div class="q-opt-label">a.</div>
+          <div class="q-opt-text">Dejé la pregunta en blanco — si no sé, no sé.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq2b1" style="width:0%"></div></div>
+          <div class="q-pct" id="dq2p1">—</div>
+        </div>
+        <div class="q-option" id="dq2_o2">
+          <div class="q-opt-label">b.</div>
+          <div class="q-opt-text">Escribí algo rápido solo para seguir avanzando.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq2b2" style="width:0%"></div></div>
+          <div class="q-pct" id="dq2p2">—</div>
+        </div>
+        <div class="q-option" id="dq2_o3">
+          <div class="q-opt-label">c.</div>
+          <div class="q-opt-text">Me tomé un momento, intenté de nuevo aunque quedara incompleto.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq2b3" style="width:0%"></div></div>
+          <div class="q-pct" id="dq2p3">—</div>
+        </div>
+        <div class="q-option" id="dq2_o4">
+          <div class="q-opt-label">d.</div>
+          <div class="q-opt-text">La frustración me activó — intenté más fuerte y busqué ayuda.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq2b4" style="width:0%"></div></div>
+          <div class="q-pct" id="dq2p4">—</div>
+        </div>
+        <div class="q-count-badge" id="dq2total"></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="card q-card">
+        <div class="card-label">Pregunta 3 de 3 · Conexión con Redeban</div>
+        <div class="q-text">Pensando en lo que viviste hoy, ¿en qué parte de tu trabajo diario en Redeban sientes que aplica más lo que practicamos?</div>
+        <div class="q-option" id="dq3_o1">
+          <div class="q-opt-label">a.</div>
+          <div class="q-opt-text">Cuando tengo que tomar decisiones rápidas sin tener toda la información.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq3b1" style="width:0%"></div></div>
+          <div class="q-pct" id="dq3p1">—</div>
+        </div>
+        <div class="q-option" id="dq3_o2">
+          <div class="q-opt-label">b.</div>
+          <div class="q-opt-text">Cuando coordino con otras áreas y siento que no hablamos el mismo idioma.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq3b2" style="width:0%"></div></div>
+          <div class="q-pct" id="dq3p2">—</div>
+        </div>
+        <div class="q-option" id="dq3_o3">
+          <div class="q-opt-label">c.</div>
+          <div class="q-opt-text">Cuando el cliente (interno o externo) necesita algo y los procesos no me lo facilitan.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq3b3" style="width:0%"></div></div>
+          <div class="q-pct" id="dq3p3">—</div>
+        </div>
+        <div class="q-option" id="dq3_o4">
+          <div class="q-opt-label">d.</div>
+          <div class="q-opt-text">Cuando hay cambios en la organización y no sé bien cómo adaptarme.</div>
+          <div class="q-bar-wrap"><div class="q-bar" id="dq3b4" style="width:0%"></div></div>
+          <div class="q-pct" id="dq3p4">—</div>
+        </div>
+        <div class="q-count-badge" id="dq3total"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Top 5 -->
+    <div class="card col-right">
+      <div class="card-label">Ranking de agilidad</div>
+      <div class="top5-hdr">Top 5 · Mayor puntaje</div>
+      <div class="top5-sub">Workshop #1 — Adaptabilidad al cambio</div>
+      <ul class="top5-list" id="top5list">
+        <li class="empty-state"><span style="font-size:28px;opacity:.3">⏳</span>Esperando datos…</li>
+      </ul>
+      <div class="last-upd" id="upd4"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxFhCY-ZJHVG-_o5LAmlgzbivkwJ8cUN5dXK_EkUERwQYRdMPxSbLGuHW7GGKMKcgbQ/exec';
+const REFRESH  = 15;
+
+let countdown = REFRESH;
+let firstLoad = true;
+
+// ── CLOCK ──
+setInterval(() => {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    [n.getHours(), n.getMinutes(), n.getSeconds()]
+      .map(v => String(v).padStart(2,'0')).join(':');
+}, 1000);
+
+// ── COUNTDOWN ──
+setInterval(() => {
+  countdown--;
+  if (countdown <= 0) { countdown = REFRESH; loadData(); }
+  document.getElementById('nextRef').textContent = `↻ en ${countdown}s`;
+}, 1000);
+
+// ── ANIM NUMBER ──
+function animNum(el, target, dur = 650) {
+  const from = parseFloat(el.textContent) || 0;
+  const t0   = performance.now();
+  (function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (target - from) * e);
+    if (p < 1) requestAnimationFrame(step);
+  })(performance.now());
+}
+
+function ts() {
+  const n = new Date();
+  return [n.getHours(), n.getMinutes(), n.getSeconds()]
+    .map(v => String(v).padStart(2,'0')).join(':');
+}
+
+function markUpdated(...ids) {
+  const t = `↻ ${ts()}`;
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t; });
+}
+
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── LOAD ──
+async function loadData() {
+  try {
+    const res  = await fetch(GAS_URL + '?action=getData&t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const rows = Array.isArray(json) ? json : (json.rows || []);
+    render(rows);
+    if (firstLoad) { document.getElementById('loading').classList.add('hide'); firstLoad = false; }
+  } catch(e) {
+    console.error(e);
+    const toast = document.getElementById('errToast');
+    toast.textContent = '⚠ Error al conectar. Reintentando en ' + countdown + 's';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+    if (firstLoad) { setTimeout(() => { document.getElementById('loading').classList.add('hide'); firstLoad = false; }, 3000); }
+  }
+}
+
+// ── RENDER ──
+function render(rows) {
+  if (!rows || !rows.length) { markUpdated('upd1','upd2','upd4'); return; }
+
+  // 1. Avg score
+  const totals = rows.map(r => parseFloat(r.total)||0);
+  const avg = totals.reduce((a,b)=>a+b,0) / totals.length;
+  animNum(document.getElementById('avgScore'), Math.round(avg));
+  document.getElementById('scoreRange').textContent =
+    `Rango: ${Math.min(...totals)} – ${Math.max(...totals)} pts`;
+
+  // 2. Participants
+  animNum(document.getElementById('totalPart'), rows.length);
+
+  // 3. Question breakdowns
+  renderQuestion('dq1', rows, 4);
+  renderQuestion('dq2', rows, 4);
+  renderQuestion('dq3', rows, 4);
+
+  // 4. Top 5
+  const sorted = [...rows].sort((a,b)=>(parseFloat(b.total)||0)-(parseFloat(a.total)||0)).slice(0,5);
+  const medals = ['🥇','🥈','🥉','',''];
+  const list = document.getElementById('top5list');
+  list.innerHTML = '';
+  sorted.forEach((r, i) => {
+    const sc  = parseFloat(r.total)||0;
+    const bar = Math.round(sc/800*100);
+    const li  = document.createElement('li');
+    li.className = 'top5-item';
+    li.innerHTML = `
+      <div class="top5-rank">#${i+1}</div>
+      <div class="top5-medal">${medals[i]||''}</div>
+      <div class="t5-info">
+        <div class="top5-name">${esc(r.nombre)}</div>
+        <div class="top5-area">${esc(r.area)}</div>
+        <div class="t5-bar"><div class="t5-bar-fill" style="width:${bar}%"></div></div>
+      </div>
+      <div class="top5-score">${sc}</div>`;
+    list.appendChild(li);
+  });
+
+  markUpdated('upd1','upd2','upd4');
+}
+
+function renderQuestion(key, rows, numOpts) {
+  const vals = rows.map(r => parseInt(r[key])||0).filter(v => v >= 1 && v <= numOpts);
+  const total = vals.length;
+
+  // count per option
+  const counts = Array(numOpts).fill(0);
+  vals.forEach(v => counts[v-1]++);
+
+  const maxCount = Math.max(...counts);
+
+  counts.forEach((c, i) => {
+    const pct   = total > 0 ? Math.round(c / total * 100) : 0;
+    const barEl = document.getElementById(`${key}b${i+1}`);
+    const pctEl = document.getElementById(`${key}p${i+1}`);
+    const rowEl = document.getElementById(`${key}_o${i+1}`);
+    if (barEl) barEl.style.width  = pct + '%';
+    if (pctEl) pctEl.textContent  = total > 0 ? pct + '%' : '—';
+    // highlight leader
+    if (rowEl) {
+      rowEl.classList.toggle('leader', c === maxCount && c > 0);
+    }
+  });
+
+  const badge = document.getElementById(`${key}total`);
+  if (badge) badge.textContent = total > 0 ? `${total} respuestas` : '';
+}
+
+loadData();
+</script>
+</body>
+</html>

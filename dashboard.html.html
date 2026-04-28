@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSprint · Dashboard · Redeban</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500&family=Barlow+Condensed:wght@300;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════ */
+:root {
+  --bg:       #04122e;
+  --bg2:      #071b45;
+  --teal:     #00b89c;
+  --teal2:    #00e8c6;
+  --teal-dim: rgba(0,184,156,0.12);
+  --white:    #eef2fb;
+  --mid:      #8ba4c4;
+  --muted:    #4a6285;
+  --border:   rgba(0,184,156,0.14);
+  --card:     rgba(5,20,58,0.82);
+  --mono:     'DM Mono', monospace;
+  --sans:     'Barlow', sans-serif;
+  --cond:     'Barlow Condensed', sans-serif;
+}
+
+/* ════════════════════════════════════════
+   RESET & BASE
+════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+
+/* dot grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(0,184,156,0.18) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* center glow */
+body::after {
+  content: '';
+  position: fixed; z-index: 0; pointer-events: none;
+  top: -15%; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 600px;
+  background: radial-gradient(ellipse, rgba(0,184,156,0.06) 0%, transparent 65%);
+}
+
+/* ════════════════════════════════════════
+   SHELL
+════════════════════════════════════════ */
+#shell {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+  width: 100%;
+}
+
+/* ════════════════════════════════════════
+   HEADER
+════════════════════════════════════════ */
+#hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: rgba(4,18,46,0.94);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: relative; z-index: 20;
+}
+
+.hdr-brand { display: flex; align-items: center; gap: 16px; }
+.hdr-logo { height: 20px; filter: brightness(0) invert(1); opacity: .88; }
+.hdr-sep  { width: 1px; height: 20px; background: var(--border); }
+.hdr-name { font-family: var(--cond); font-size: 14px; font-weight: 700;
+            letter-spacing: .16em; text-transform: uppercase; color: var(--teal); }
+
+.hdr-meta { display: flex; align-items: center; gap: 20px; }
+
+.live-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; color: var(--teal);
+  text-transform: uppercase; letter-spacing: .1em;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--teal);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.65)} }
+
+#clock { font-family: var(--mono); font-size: 14px; color: var(--mid);
+         letter-spacing: .08em; }
+#ticker { font-family: var(--mono); font-size: 10px; color: var(--muted);
+          letter-spacing: .04em; min-width: 60px; text-align: right; }
+
+/* corner brackets */
+.bracket {
+  position: fixed; width: 18px; height: 18px;
+  pointer-events: none; z-index: 30;
+}
+.bracket-tl { top:6px;  left:6px;  border-top:2px solid var(--teal); border-left:2px solid var(--teal); }
+.bracket-tr { top:6px;  right:6px; border-top:2px solid var(--teal); border-right:2px solid var(--teal); }
+.bracket-bl { bottom:6px;left:6px; border-bottom:2px solid var(--teal); border-left:2px solid var(--teal); }
+.bracket-br { bottom:6px;right:6px;border-bottom:2px solid var(--teal); border-right:2px solid var(--teal); }
+
+/* ════════════════════════════════════════
+   MAIN — 3 COLUMNS
+════════════════════════════════════════ */
+#main {
+  display: grid;
+  grid-template-columns: 260px 1fr 280px;
+  gap: 14px;
+  padding: 14px 20px 14px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════
+   CARD BASE
+════════════════════════════════════════ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+/* top shimmer line */
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--teal) 40%, var(--teal2) 60%, transparent 100%);
+  opacity: .4;
+}
+
+.card-eyebrow {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  margin-bottom: 10px;
+}
+
+.card-ts {
+  position: absolute; bottom: 9px; right: 13px;
+  font-family: var(--mono); font-size: 8px;
+  color: rgba(74,98,133,0.5); letter-spacing: .04em;
+}
+
+/* ════════════════════════════════════════
+   LEFT COLUMN — KPIs
+════════════════════════════════════════ */
+#col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* shared KPI block */
+.kpi {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* score card accent */
+.kpi-score {
+  border-color: rgba(0,184,156,0.3);
+  background: linear-gradient(150deg, rgba(0,184,156,0.09) 0%, rgba(5,20,58,0.88) 100%);
+}
+.kpi-score::after {
+  content: '';
+  position: absolute;
+  bottom: -55px; left: 50%; transform: translateX(-50%);
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,184,156,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.kpi-big {
+  font-family: var(--cond);
+  font-size: clamp(72px, 6.5vw, 108px);
+  font-weight: 800;
+  line-height: .95;
+  letter-spacing: -.02em;
+  background: linear-gradient(140deg, var(--teal) 20%, var(--teal2) 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-variant-numeric: tabular-nums;
+  transition: all .55s ease;
+  margin-bottom: 6px;
+}
+
+.kpi-count .kpi-big {
+  background: var(--white);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: clamp(60px, 5.5vw, 88px);
+}
+
+.kpi-unit {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.kpi-range {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(74,98,133,0.7);
+  margin-top: 5px;
+  letter-spacing: .04em;
+}
+
+/* ════════════════════════════════════════
+   CENTER COLUMN — QUESTIONS
+════════════════════════════════════════ */
+#col-center {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+#col-center::-webkit-scrollbar { display: none; }
+
+.q-card { flex-shrink: 0; }
+
+/* question text */
+.q-text {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.4;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0,184,156,0.1);
+}
+
+/* respondent count chip */
+.q-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--teal);
+  background: rgba(0,184,156,0.08);
+  border: 1px solid rgba(0,184,156,0.18);
+  border-radius: 20px;
+  padding: 2px 9px;
+  margin-bottom: 13px;
+}
+
+/* option row */
+.opt-row {
+  display: grid;
+  grid-template-columns: 22px 1fr 140px 46px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background .2s;
+}
+.opt-row:last-of-type { border-bottom: none; }
+
+.opt-row.leader .opt-letter { color: var(--teal2); }
+.opt-row.leader .opt-text   { color: var(--white); font-weight: 600; }
+.opt-row.leader .opt-pct    { color: var(--teal2); }
+.opt-row.leader .opt-bar-fill { box-shadow: 0 0 10px rgba(0,184,156,0.5); }
+
+.opt-letter {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: .06em;
+}
+
+.opt-text {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--mid);
+  line-height: 1.35;
+}
+
+.opt-bar-wrap {
+  height: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+.opt-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--teal) 0%, var(--teal2) 100%);
+  transition: width .85s cubic-bezier(.4,0,.2,1);
+  min-width: 3px;
+}
+
+.opt-pct {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mid);
+  text-align: right;
+  letter-spacing: .04em;
+  transition: color .4s;
+}
+
+/* ════════════════════════════════════════
+   RIGHT COLUMN — TOP 5
+════════════════════════════════════════ */
+#col-right { overflow: hidden; }
+
+.top5-title {
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: .06em;
+  margin-bottom: 3px;
+}
+.top5-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .06em;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.top5-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+.t5-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.055);
+  animation: fromRight .35s ease both;
+}
+.t5-item:nth-child(1){animation-delay:.04s}
+.t5-item:nth-child(2){animation-delay:.08s}
+.t5-item:nth-child(3){animation-delay:.12s}
+.t5-item:nth-child(4){animation-delay:.16s}
+.t5-item:nth-child(5){animation-delay:.20s}
+@keyframes fromRight { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+
+.t5-item:first-child {
+  border-color: rgba(0,184,156,0.32);
+  background: rgba(0,184,156,0.07);
+}
+
+.t5-rank { font-family: var(--mono); font-size: 11px; font-weight: 700;
+           color: var(--muted); min-width: 20px; text-align: center; }
+.t5-item:first-child .t5-rank { color: var(--teal2); }
+
+.t5-medal { font-size: 17px; min-width: 20px; text-align: center; }
+
+.t5-body { flex: 1; min-width: 0; }
+.t5-name { font-family: var(--sans); font-size: 13px; font-weight: 600;
+           color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t5-area { font-family: var(--mono); font-size: 9px; color: var(--muted);
+           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .04em; }
+.t5-bar  { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px;
+           margin-top: 5px; overflow: hidden; }
+.t5-bar-fill { height: 100%; border-radius: 2px;
+               background: linear-gradient(90deg, var(--teal), var(--teal2));
+               transition: width .85s cubic-bezier(.4,0,.2,1); }
+.t5-score { font-family: var(--mono); font-size: 19px; font-weight: 700;
+            color: var(--teal); min-width: 38px; text-align: right; }
+.t5-item:first-child .t5-score { color: var(--teal2); }
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px; padding: 30px 0;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  opacity: .5; text-align: center;
+}
+
+/* ════════════════════════════════════════
+   LOADING OVERLAY
+════════════════════════════════════════ */
+#loading {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  transition: opacity .55s ease;
+}
+#loading.gone { opacity: 0; pointer-events: none; }
+.ld-logo { height: 26px; filter: brightness(0) invert(1); opacity: .75; margin-bottom: 4px; }
+.ld-ring {
+  width: 42px; height: 42px;
+  border: 3px solid rgba(0,184,156,0.13);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ld-text { font-family: var(--mono); font-size: 10px; color: var(--muted);
+           text-transform: uppercase; letter-spacing: .12em; }
+
+/* ════════════════════════════════════════
+   ERROR TOAST
+════════════════════════════════════════ */
+#err-toast {
+  position: fixed; bottom: 16px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: rgba(255,80,80,0.1);
+  border: 1px solid rgba(255,80,80,0.22);
+  border-radius: 7px; padding: 8px 18px;
+  font-family: var(--mono); font-size: 11px; color: #ff9090;
+  z-index: 800; transition: transform .3s ease;
+}
+#err-toast.show { transform: translateX(-50%) translateY(0); }
+
+/* scan-line veil */
+.veil {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.014) 2px, rgba(0,0,0,0.014) 4px
+  );
+}
+</style>
+</head>
+<body>
+
+<!-- atmosphere -->
+<div class="veil"></div>
+<div class="bracket bracket-tl"></div>
+<div class="bracket bracket-tr"></div>
+<div class="bracket bracket-bl"></div>
+<div class="bracket bracket-br"></div>
+
+<!-- loading -->
+<div id="loading">
+  <img class="ld-logo" src="https://www.redeban.com/sites/default/files/Logo.png" alt="Redeban" onerror="this.style.display='none'">
+  <div class="ld-ring"></div>
+  <div class="ld-text">Conectando con el rally…</div>
+</div>
+
+<div id="err-toast"></div>
+
+<!-- ════ SHELL ════ -->
+<div id="shell">
+
+  <!-- HEADER -->
+  <header id="hdr">
+    <div class="hdr-brand">
+      <img class="hdr-logo" src="https://www.redeban.com/sites/default/files/Logo.png" alt="Redeban" onerror="this.style.display='none'">
+      <div class="hdr-sep"></div>
+      <span class="hdr-name">MindSprint · Centro de Control</span>
+    </div>
+    <div class="hdr-meta">
+      <div class="live-pill"><div class="live-dot"></div><span>En vivo</span></div>
+      <span id="clock">--:--:--</span>
+      <span id="ticker">↻ en 15s</span>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- ══ LEFT: KPIs ══ -->
+    <div id="col-left">
+
+      <div class="card kpi kpi-score">
+        <div class="card-eyebrow">Puntaje promedio general</div>
+        <div class="kpi-big" id="avg-num">—</div>
+        <div class="kpi-unit">de 800 puntos</div>
+        <div class="kpi-range" id="avg-range">&nbsp;</div>
+        <div class="card-ts" id="ts-left"></div>
+      </div>
+
+      <div class="card kpi kpi-count">
+        <div class="card-eyebrow">Participantes finalizados</div>
+        <div class="kpi-big" id="part-num">—</div>
+        <div class="kpi-unit">colaboradores</div>
+        <div class="card-ts" id="ts-left2"></div>
+      </div>
+
+    </div>
+
+    <!-- ══ CENTER: Question breakdowns ══ -->
+    <div id="col-center">
+
+      <!-- Q1 -->
+      <div class="card q-card">
+        <div class="card-eyebrow">Pregunta 1 de cierre · Desafíos</div>
+        <div class="q-text">Cuando llegué a una pregunta que no sabía cómo resolver, lo primero que pensé fue…</div>
+        <div class="q-chip" id="q1-chip">0 respuestas</div>
+        <div class="opt-row" id="q1-r1">
+          <div class="opt-letter">a.</div>
+          <div class="opt-text">"Esto no es para mí, claramente no tengo lo que se necesita."</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q1-b1" style="width:0%"></div></div>
+          <div class="opt-pct" id="q1-p1">—</div>
+        </div>
+        <div class="opt-row" id="q1-r2">
+          <div class="opt-letter">b.</div>
+          <div class="opt-text">"Si no sé la respuesta rápido, mejor me salto esto."</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q1-b2" style="width:0%"></div></div>
+          <div class="opt-pct" id="q1-p2">—</div>
+        </div>
+        <div class="opt-row" id="q1-r3">
+          <div class="opt-letter">c.</div>
+          <div class="opt-text">"No sé todavía, pero voy a intentarlo igual."</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q1-b3" style="width:0%"></div></div>
+          <div class="opt-pct" id="q1-p3">—</div>
+        </div>
+        <div class="opt-row" id="q1-r4">
+          <div class="opt-letter">d.</div>
+          <div class="opt-text">"Una pregunta que no sé resolver es exactamente la que más me interesa."</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q1-b4" style="width:0%"></div></div>
+          <div class="opt-pct" id="q1-p4">—</div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="card q-card">
+        <div class="card-eyebrow">Pregunta 2 de cierre · Esfuerzo</div>
+        <div class="q-text">Cuando me frustré en alguna pregunta, lo que hice fue…</div>
+        <div class="q-chip" id="q2-chip">0 respuestas</div>
+        <div class="opt-row" id="q2-r1">
+          <div class="opt-letter">a.</div>
+          <div class="opt-text">Dejé la pregunta en blanco — si no sé, no sé.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q2-b1" style="width:0%"></div></div>
+          <div class="opt-pct" id="q2-p1">—</div>
+        </div>
+        <div class="opt-row" id="q2-r2">
+          <div class="opt-letter">b.</div>
+          <div class="opt-text">Escribí algo rápido solo para seguir avanzando.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q2-b2" style="width:0%"></div></div>
+          <div class="opt-pct" id="q2-p2">—</div>
+        </div>
+        <div class="opt-row" id="q2-r3">
+          <div class="opt-letter">c.</div>
+          <div class="opt-text">Me tomé un momento, intenté de nuevo aunque quedara incompleto.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q2-b3" style="width:0%"></div></div>
+          <div class="opt-pct" id="q2-p3">—</div>
+        </div>
+        <div class="opt-row" id="q2-r4">
+          <div class="opt-letter">d.</div>
+          <div class="opt-text">La frustración me activó — intenté más fuerte y busqué ayuda.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q2-b4" style="width:0%"></div></div>
+          <div class="opt-pct" id="q2-p4">—</div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="card q-card">
+        <div class="card-eyebrow">Pregunta 3 de cierre · Conexión con Redeban</div>
+        <div class="q-text">Pensando en lo que viviste hoy, ¿en qué parte de tu trabajo diario en Redeban sientes que aplica más lo que practicamos?</div>
+        <div class="q-chip" id="q3-chip">0 respuestas</div>
+        <div class="opt-row" id="q3-r1">
+          <div class="opt-letter">a.</div>
+          <div class="opt-text">Cuando tengo que tomar decisiones rápidas sin tener toda la información.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q3-b1" style="width:0%"></div></div>
+          <div class="opt-pct" id="q3-p1">—</div>
+        </div>
+        <div class="opt-row" id="q3-r2">
+          <div class="opt-letter">b.</div>
+          <div class="opt-text">Cuando coordino con otras áreas y siento que no hablamos el mismo idioma.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q3-b2" style="width:0%"></div></div>
+          <div class="opt-pct" id="q3-p2">—</div>
+        </div>
+        <div class="opt-row" id="q3-r3">
+          <div class="opt-letter">c.</div>
+          <div class="opt-text">Cuando el cliente (interno o externo) necesita algo y los procesos no me lo facilitan.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q3-b3" style="width:0%"></div></div>
+          <div class="opt-pct" id="q3-p3">—</div>
+        </div>
+        <div class="opt-row" id="q3-r4">
+          <div class="opt-letter">d.</div>
+          <div class="opt-text">Cuando hay cambios en la organización y no sé bien cómo adaptarme.</div>
+          <div class="opt-bar-wrap"><div class="opt-bar-fill" id="q3-b4" style="width:0%"></div></div>
+          <div class="opt-pct" id="q3-p4">—</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ RIGHT: Top 5 ══ -->
+    <div class="card" id="col-right">
+      <div class="card-eyebrow">Ranking de agilidad</div>
+      <div class="top5-title">Top 5</div>
+      <div class="top5-sub">Workshop #1 · Mayor puntaje total</div>
+      <ul class="top5-list" id="top5">
+        <li class="empty-state">
+          <span style="font-size:28px;opacity:.3">⏳</span>
+          Esperando datos…
+        </li>
+      </ul>
+      <div class="card-ts" id="ts-right"></div>
+    </div>
+
+  </div><!-- /#main -->
+
+</div><!-- /#shell -->
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════ */
+const GAS     = 'https://script.google.com/macros/s/AKfycbxFhCY-ZJHVG-_o5LAmlgzbivkwJ8cUN5dXK_EkUERwQYRdMPxSbLGuHW7GGKMKcgbQ/exec';
+const PERIOD  = 15; // seconds between refreshes
+
+let secs      = PERIOD;
+let firstLoad = true;
+
+/* ═══════════════════════════════════════════════════
+   CLOCK  (updates every second)
+═══════════════════════════════════════════════════ */
+function pad(n){ return String(n).padStart(2,'0'); }
+
+setInterval(() => {
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  secs--;
+  if (secs <= 0){ secs = PERIOD; fetchData(); }
+  document.getElementById('ticker').textContent = `↻ en ${secs}s`;
+}, 1000);
+
+/* ═══════════════════════════════════════════════════
+   ANIMATED COUNTER
+═══════════════════════════════════════════════════ */
+function countTo(el, target, ms = 700) {
+  const from = parseFloat(el.textContent.replace(/[^0-9.]/g,'')) || 0;
+  const t0   = performance.now();
+  (function tick(now){
+    const p   = Math.min((now - t0) / ms, 1);
+    const val = from + (target - from) * (1 - Math.pow(1-p, 3));
+    el.textContent = Math.round(val);
+    if (p < 1) requestAnimationFrame(tick);
+  })(performance.now());
+}
+
+/* ═══════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════ */
+function nowHMS() {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg) {
+  const el = document.getElementById('err-toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4500);
+}
+
+/* ═══════════════════════════════════════════════════
+   FETCH
+═══════════════════════════════════════════════════ */
+async function fetchData() {
+  try {
+    const res  = await fetch(GAS + '?action=getData&_=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const body = await res.json();
+
+    // accept { rows:[...] }  OR  direct array
+    const rows = Array.isArray(body) ? body : (body.rows || []);
+    render(rows);
+
+    if (firstLoad) {
+      document.getElementById('loading').classList.add('gone');
+      firstLoad = false;
+    }
+  } catch(err) {
+    console.error('[dashboard]', err);
+    toast('⚠ Sin conexión — reintentando en ' + secs + 's');
+    if (firstLoad) {
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('gone');
+        firstLoad = false;
+      }, 3000);
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════ */
+function render(rows) {
+  const n = rows.length;
+  const ts = `↻ ${nowHMS()}`;
+
+  /* ── KPI 1: average score ── */
+  const totals = rows.map(r => parseFloat(r.total) || 0);
+  const avg    = n > 0 ? totals.reduce((a,b)=>a+b,0) / n : 0;
+  countTo(document.getElementById('avg-num'), Math.round(avg));
+  document.getElementById('avg-range').textContent =
+    n > 0 ? `Rango: ${Math.min(...totals)} – ${Math.max(...totals)} pts` : '';
+
+  /* ── KPI 2: participants ── */
+  countTo(document.getElementById('part-num'), n);
+
+  /* ── Timestamps ── */
+  ['ts-left','ts-left2','ts-right'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = ts;
+  });
+
+  /* ── Question breakdowns ── */
+  renderQ('dq1', 'q1', rows, n);
+  renderQ('dq2', 'q2', rows, n);
+  renderQ('dq3', 'q3', rows, n);
+
+  /* ── Top 5 ── */
+  renderTop5(rows);
+}
+
+/* ──────────────────────────────────────────────────
+   renderQ — counts exactly how many '1','2','3','4'
+   were chosen for a given dq field, then renders
+   bars + percentages for each of the 4 options.
+────────────────────────────────────────────────── */
+function renderQ(field, prefix, rows, total) {
+  // Count votes per option value (1,2,3,4)
+  const counts = {1:0, 2:0, 3:0, 4:0};
+  let answered = 0;
+
+  rows.forEach(r => {
+    const v = parseInt(r[field], 10);
+    if (v >= 1 && v <= 4) {
+      counts[v]++;
+      answered++;
+    }
+  });
+
+  // Update chip
+  const chip = document.getElementById(`${prefix}-chip`);
+  if (chip) chip.textContent = answered === 1 ? '1 respuesta' : `${answered} respuestas`;
+
+  // Find the winning count to highlight leader
+  const maxCount = Math.max(counts[1], counts[2], counts[3], counts[4]);
+
+  for (let opt = 1; opt <= 4; opt++) {
+    const pct     = answered > 0 ? Math.round(counts[opt] / answered * 100) : 0;
+    const barEl   = document.getElementById(`${prefix}-b${opt}`);
+    const pctEl   = document.getElementById(`${prefix}-p${opt}`);
+    const rowEl   = document.getElementById(`${prefix}-r${opt}`);
+
+    if (barEl) barEl.style.width  = pct + '%';
+    if (pctEl) pctEl.textContent  = answered > 0 ? pct + '%' : '—';
+    if (rowEl) {
+      const isLeader = counts[opt] === maxCount && maxCount > 0;
+      rowEl.classList.toggle('leader', isLeader);
+    }
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   renderTop5
+────────────────────────────────────────────────── */
+function renderTop5(rows) {
+  const sorted = [...rows]
+    .sort((a,b) => (parseFloat(b.total)||0) - (parseFloat(a.total)||0))
+    .slice(0, 5);
+
+  const medals = ['🥇','🥈','🥉','',''];
+  const list   = document.getElementById('top5');
+  list.innerHTML = '';
+
+  if (sorted.length === 0) {
+    list.innerHTML = '<li class="empty-state"><span style="font-size:26px;opacity:.3">⏳</span>Esperando datos…</li>';
+    return;
+  }
+
+  sorted.forEach((r, i) => {
+    const sc  = parseFloat(r.total) || 0;
+    const bar = Math.round(sc / 800 * 100);
+    const li  = document.createElement('li');
+    li.className = 't5-item';
+    li.innerHTML = `
+      <div class="t5-rank">#${i+1}</div>
+      <div class="t5-medal">${medals[i] || ''}</div>
+      <div class="t5-body">
+        <div class="t5-name">${esc(r.nombre)}</div>
+        <div class="t5-area">${esc(r.area)}</div>
+        <div class="t5-bar"><div class="t5-bar-fill" style="width:${bar}%"></div></div>
+      </div>
+      <div class="t5-score">${sc}</div>`;
+    list.appendChild(li);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════ */
+fetchData();
+</script>
+</body>
+</html>

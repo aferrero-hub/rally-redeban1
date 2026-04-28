@@ -10,19 +10,19 @@
    TOKENS
 ════════════════════════════════════════ */
 :root {
-  --bg:       #04122e;
-  --bg2:      #071b45;
-  --teal:     #00b89c;
-  --teal2:    #00e8c6;
+  --bg:        #04122e;
+  --bg2:       #071b45;
+  --teal:      #00b89c;
+  --teal2:     #00e8c6;
   --teal-dim: rgba(0,184,156,0.12);
-  --white:    #eef2fb;
-  --mid:      #8ba4c4;
-  --muted:    #4a6285;
-  --border:   rgba(0,184,156,0.14);
-  --card:     rgba(5,20,58,0.82);
-  --mono:     'DM Mono', monospace;
-  --sans:     'Barlow', sans-serif;
-  --cond:     'Barlow Condensed', sans-serif;
+  --white:     #eef2fb;
+  --mid:       #8ba4c4;
+  --muted:     #4a6285;
+  --border:    rgba(0,184,156,0.14);
+  --card:      rgba(5,20,58,0.82);
+  --mono:      'DM Mono', monospace;
+  --sans:      'Barlow', sans-serif;
+  --cond:      'Barlow Condensed', sans-serif;
 }
 
 /* ════════════════════════════════════════
@@ -289,9 +289,10 @@ body::after {
 }
 .opt-row:last-of-type { border-bottom: none; }
 
+.opt-row.leader { background: rgba(0, 184, 156, 0.05); }
 .opt-row.leader .opt-letter { color: var(--teal2); }
 .opt-row.leader .opt-text   { color: var(--white); font-weight: 600; }
-.opt-row.leader .opt-pct    { color: var(--teal2); }
+.opt-row.leader .opt-pct     { color: var(--teal2); }
 .opt-row.leader .opt-bar-fill { box-shadow: 0 0 10px rgba(0,184,156,0.5); }
 
 .opt-letter {
@@ -457,14 +458,12 @@ body::after {
 </head>
 <body>
 
-<!-- atmosphere -->
 <div class="veil"></div>
 <div class="bracket bracket-tl"></div>
 <div class="bracket bracket-tr"></div>
 <div class="bracket bracket-bl"></div>
 <div class="bracket bracket-br"></div>
 
-<!-- loading -->
 <div id="loading">
   <img class="ld-logo" src="https://www.redeban.com/sites/default/files/Logo.png" alt="Redeban" onerror="this.style.display='none'">
   <div class="ld-ring"></div>
@@ -473,10 +472,8 @@ body::after {
 
 <div id="err-toast"></div>
 
-<!-- ════ SHELL ════ -->
 <div id="shell">
 
-  <!-- HEADER -->
   <header id="hdr">
     <div class="hdr-brand">
       <img class="hdr-logo" src="https://www.redeban.com/sites/default/files/Logo.png" alt="Redeban" onerror="this.style.display='none'">
@@ -490,10 +487,8 @@ body::after {
     </div>
   </header>
 
-  <!-- MAIN -->
   <div id="main">
 
-    <!-- ══ LEFT: KPIs ══ -->
     <div id="col-left">
 
       <div class="card kpi kpi-score">
@@ -513,10 +508,8 @@ body::after {
 
     </div>
 
-    <!-- ══ CENTER: Question breakdowns ══ -->
     <div id="col-center">
 
-      <!-- Q1 -->
       <div class="card q-card">
         <div class="card-eyebrow">Pregunta 1 de cierre · Desafíos</div>
         <div class="q-text">Cuando llegué a una pregunta que no sabía cómo resolver, lo primero que pensé fue…</div>
@@ -547,7 +540,6 @@ body::after {
         </div>
       </div>
 
-      <!-- Q2 -->
       <div class="card q-card">
         <div class="card-eyebrow">Pregunta 2 de cierre · Esfuerzo</div>
         <div class="q-text">Cuando me frustré en alguna pregunta, lo que hice fue…</div>
@@ -578,7 +570,6 @@ body::after {
         </div>
       </div>
 
-      <!-- Q3 -->
       <div class="card q-card">
         <div class="card-eyebrow">Pregunta 3 de cierre · Conexión con Redeban</div>
         <div class="q-text">Pensando en lo que viviste hoy, ¿en qué parte de tu trabajo diario en Redeban sientes que aplica más lo que practicamos?</div>
@@ -611,7 +602,6 @@ body::after {
 
     </div>
 
-    <!-- ══ RIGHT: Top 5 ══ -->
     <div class="card" id="col-right">
       <div class="card-eyebrow">Ranking de agilidad</div>
       <div class="top5-title">Top 5</div>
@@ -625,15 +615,12 @@ body::after {
       <div class="card-ts" id="ts-right"></div>
     </div>
 
-  </div><!-- /#main -->
-
-</div><!-- /#shell -->
-
-<script>
+  </div></div><script>
 /* ═══════════════════════════════════════════════════
    CONFIG
 ═══════════════════════════════════════════════════ */
-const GAS     = 'https://script.google.com/macros/s/AKfycbxFhCY-ZJHVG-_o5LAmlgzbivkwJ8cUN5dXK_EkUERwQYRdMPxSbLGuHW7GGKMKcgbQ/exec';
+// URL ACTUALIZADA PARA EL SISTEMA SIN DUPLICADOS
+const GAS     = 'https://script.google.com/macros/s/AKfycbzZN2P0WqFwY2ETba8PX3y3x1mQnDhlxvj6UETWyDrl7F5arrESmOQULhaSPmFDrfb9/exec';
 const PERIOD  = 15; // seconds between refreshes
 
 let secs      = PERIOD;

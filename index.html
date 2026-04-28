@@ -14,12 +14,12 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--navy);color:var(--white);font-family:'Trebuchet MS',Trebuchet,Arial,sans-serif;min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,184,156,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,184,156,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
-.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 20px 80px;}
+.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 20px 110px;}
 
 /* HEADER */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 0 16px;border-bottom:1px solid var(--border);margin-bottom:26px;}
+.hdr{position:sticky;top:0;z-index:200;background:rgba(4,18,46,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:12px 20px 12px;border-bottom:1px solid var(--border);margin:0 -20px 26px;box-shadow:0 2px 20px rgba(0,0,0,0.4);}
 .hdr-left{display:flex;align-items:center;gap:14px;}
-.rb-logo{height:26px;filter:brightness(0) invert(1);opacity:.9;}
+.rb-logo{height:24px;filter:brightness(0) invert(1);opacity:.92;}
 .pipe{width:1px;height:20px;background:var(--border);}
 .sm-tag{font-size:10px;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;}
 .hdr-right{font-size:11px;color:var(--muted);text-align:right;line-height:1.7;}
@@ -84,9 +84,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal);color:var(--navy);font-size:12px;padding:10px 20px;border-radius:8px;font-weight:700;opacity:0;transition:all .3s;z-index:400;pointer-events:none;max-width:360px;text-align:center;line-height:1.5;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* RETO HEADER */
+/* STEP INDICATOR replaces reto-chip */
+.step-indicator{display:flex;align-items:center;gap:4px;margin-bottom:6px;}
+.step-dot{width:28px;height:4px;border-radius:2px;background:rgba(255,255,255,0.08);transition:background .3s;}
+.step-dot.done{background:var(--teal);}
+.step-dot.active{background:var(--teal2);box-shadow:0 0 6px var(--teal2);}
+.reto-chip{display:none;}/* hidden — replaced by step indicator */
 .reto-hdr{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;}
-.reto-chip{font-size:10px;color:var(--teal);background:rgba(0,184,156,0.1);border:1px solid var(--border);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
 .reto-title{font-size:21px;font-weight:700;color:var(--white);line-height:1.2;margin-bottom:5px;}
 .reto-sub{font-size:13px;color:var(--muted);}
 
@@ -111,6 +115,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .ealert{background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.18);border-left:3px solid var(--amber);border-radius:10px;padding:16px 18px;margin-bottom:18px;font-size:14px;line-height:1.75;color:#e8d5a0;}
 .ea-title{font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
 
+/* PUZZLE MC */
+.pmc-q{margin-bottom:18px;}
+.pmc-q-lbl{font-size:11px;color:var(--teal);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:block;font-weight:700;}
+.pmc-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(255,255,255,0.07);border-radius:9px;margin-bottom:5px;cursor:pointer;transition:all .15s;font-size:13px;color:#c5d3ee;}
+.pmc-opt:hover{border-color:rgba(0,184,156,0.35);background:rgba(0,184,156,0.03);}
+.pmc-opt.sel{border-color:var(--teal);background:rgba(0,184,156,0.08);color:var(--white);}
+.pmc-radio{width:16px;height:16px;flex-shrink:0;border:2px solid rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.pmc-opt.sel .pmc-radio{border-color:var(--teal);background:var(--teal);}
+.pmc-opt.sel .pmc-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--navy);display:block;}
 /* PISTAS */
 .pistas-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px;}
 .pista{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:11px 13px;font-size:13px;color:#c5d3ee;line-height:1.5;}
@@ -135,46 +148,40 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 /* OPTIONS */
 .opts{list-style:none;}
 .opt{display:flex;align-items:flex-start;gap:11px;padding:12px 15px;border:1px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:7px;cursor:pointer;transition:all .15s;font-size:14px;color:#c5d3ee;line-height:1.5;}
-.opt:hover{border-color:var(--teal);background:rgba(0,184,156,0.04);}
-.opt.sel{border-color:var(--teal);background:rgba(0,184,156,0.07);color:var(--white);}
+.opt:hover{border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.02);}
+.opt.sel{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.05);color:var(--white);}
 .opt-box{width:18px;height:18px;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.18);border-radius:4px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;}
-.opt.sel .opt-box{background:var(--teal);border-color:var(--teal);color:var(--navy);}
+.opt.sel .opt-box{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);color:var(--white);}
 .opt-radio .opt-box{border-radius:50%;}
 
-/* GRADIENTE DWECK */
+/* GRADIENTE DWECK — neutral, sin semáforo */
 .grad-wrap{margin-bottom:8px;}
 .grad-opt{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border:1px solid rgba(255,255,255,0.07);border-radius:10px;cursor:pointer;transition:all .15s;font-size:14px;color:#c5d3ee;line-height:1.5;margin-bottom:7px;}
-.grad-opt:hover{border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.02);}
-.grad-opt.sel{color:var(--white);}
-.grad-dot{width:14px;height:14px;flex-shrink:0;border-radius:50%;margin-top:3px;border:2px solid rgba(255,255,255,0.15);transition:all .15s;}
-.grad-opt.sel .grad-dot{border-color:transparent;}
-.go1 .grad-dot,.go1.sel{border-color:rgba(255,82,82,0.4);background:rgba(255,82,82,0.07);}
-.go1 .grad-dot{background:rgba(255,82,82,0.5);}
-.go2 .grad-dot,.go2.sel{border-color:rgba(255,179,0,0.35);background:rgba(255,179,0,0.06);}
-.go2 .grad-dot{background:rgba(255,179,0,0.6);}
-.go3 .grad-dot,.go3.sel{border-color:rgba(0,184,156,0.35);background:rgba(0,184,156,0.06);}
-.go3 .grad-dot{background:rgba(0,184,156,0.7);}
-.go4 .grad-dot,.go4.sel{border-color:rgba(0,232,198,0.4);background:rgba(0,232,198,0.07);}
-.go4 .grad-dot{background:rgba(0,232,198,0.9);}
+.grad-opt:hover{border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.03);}
+.grad-opt.sel{border-color:rgba(255,255,255,0.28);background:rgba(255,255,255,0.05);color:var(--white);}
+.grad-dot{width:14px;height:14px;flex-shrink:0;border-radius:50%;margin-top:3px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);transition:all .15s;}
+.grad-opt.sel .grad-dot{border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.2);}
+.go1 .grad-dot,.go2 .grad-dot,.go3 .grad-dot,.go4 .grad-dot{background:rgba(255,255,255,0.06);}
+.go1.sel,.go2.sel,.go3.sel,.go4.sel{border-color:rgba(255,255,255,0.28);background:rgba(255,255,255,0.05);}
 .grad-legend{display:flex;justify-content:space-between;font-size:10px;padding:0 4px;}
-.grad-legend .gl-fija{color:var(--accent);}
-.grad-legend .gl-creci{color:var(--teal);}
+.grad-legend .gl-fija{color:var(--muted);}
+.grad-legend .gl-creci{color:var(--muted);}
 
 /* ZONA */
-.zona-situation{background:rgba(255,82,82,0.06);border:1px solid rgba(255,82,82,0.15);border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:14px;line-height:1.7;color:#e8c5c5;}
-.zs-title{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.zona-situation{background:rgba(0,184,156,0.04);border:1px solid rgba(0,184,156,0.14);border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:14px;line-height:1.7;color:#c5d3ee;}
+.zs-title{font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
 .zona-score{display:flex;align-items:center;gap:10px;background:rgba(0,184,156,0.06);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);}
 .zona-pts{font-size:22px;font-weight:700;color:var(--teal);margin-right:4px;}
 .rescate-item{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
 .rescate-item.rescued{border-color:rgba(0,184,156,0.3);background:rgba(0,184,156,0.04);}
-.rescate-item.abandoned{border-color:rgba(255,82,82,0.2);background:rgba(255,82,82,0.03);}
+.rescate-item.abandoned{border-color:rgba(107,127,163,0.35);background:rgba(107,127,163,0.04);}
 .ri-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:10px;line-height:1.4;}
 .ri-btns{display:flex;gap:7px;flex-wrap:wrap;}
 .ri-btn{font-family:'Trebuchet MS',sans-serif;font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
 .ri-btn:hover{border-color:var(--teal);color:var(--teal);}
 .ri-btn.sel-c{background:rgba(0,184,156,0.12);border-color:var(--teal);color:var(--teal);}
 .ri-btn.sel-i{background:rgba(255,179,0,0.1);border-color:var(--amber);color:var(--amber);}
-.ri-btn.sel-o{background:rgba(255,82,82,0.08);border-color:var(--accent);color:var(--accent);}
+.ri-btn.sel-o{background:rgba(107,127,163,0.1);border-color:var(--muted);color:var(--muted);}
 .zona-outside-msg{display:none;margin-top:10px;background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.18);border-radius:8px;padding:12px 14px;animation:fadeUp .2s ease;}
 .zona-outside-msg.show{display:block;}
 .zom-text{font-size:13px;color:#e8d5a0;line-height:1.6;margin-bottom:9px;}
@@ -229,7 +236,12 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 .af-attr{font-size:16px;font-weight:700;color:var(--white);margin-bottom:10px;}
 .af-text{font-size:14px;color:#a8c0d8;line-height:1.7;}
 .af-def{font-size:12px;color:var(--muted);margin-top:10px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;line-height:1.6;}
-.rb-final-logo{height:20px;filter:brightness(0) invert(1);opacity:.5;margin:14px auto 0;display:block;}
+.rb-final-logo{height:32px;filter:brightness(0) invert(1);opacity:.85;margin:18px auto 0;display:block;}
+
+/* REDEBAN FOOTER STRIP */
+.rb-strip{position:fixed;bottom:0;left:0;right:0;z-index:10;background:rgba(4,18,46,0.92);border-top:1px solid rgba(0,184,156,0.1);padding:6px 20px;display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:none;}
+.rb-strip img{height:16px;filter:brightness(0) invert(1);opacity:.4;}
+.rb-strip span{font-size:9px;color:rgba(107,127,163,0.6);text-transform:uppercase;letter-spacing:.1em;}
 
 /* MINI-CARD POST-RETO */
 .mc-wrap{position:fixed;bottom:0;left:0;right:0;z-index:500;padding:0 16px 16px;animation:slideUp .35s cubic-bezier(.4,0,.2,1);}
@@ -273,6 +285,11 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S0: PORTADA ═══ -->
 <div class="screen active" id="s0">
   <div class="cover-eye">Rally Creativo · En vivo ahora</div>
+  <div style="margin-bottom:20px;padding:14px 20px;background:rgba(0,184,156,0.05);border:1px solid rgba(0,184,156,0.15);border-radius:12px;display:flex;align-items:center;gap:14px;">
+    <img src="https://www.redeban.com/sites/default/files/Logo.png" style="height:32px;filter:brightness(0) invert(1);opacity:.95;" alt="Redeban" onerror="this.style.display='none'">
+    <div style="width:1px;height:28px;background:rgba(0,184,156,0.2);"></div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.6;">Cultura Redeban<br><span style="color:var(--teal);">Workshop #1 · Mentalidad del colaborador</span></div>
+  </div>
   <div class="cover-hero">
     <div class="cover-icons">
       <div class="cover-icon">🧠</div>
@@ -302,7 +319,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S1: LISTA DE VERIFICACIÓN ═══ -->
 <div class="screen" id="s1">
   <div class="reto-content" id="rc1">
-    <div class="reto-hdr"><div class="reto-chip">RETO 01</div><div><div class="reto-title">La lista de verificación</div><div class="reto-sub">Lee todo antes de hacer cualquier cosa</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps1"></div><div class="reto-title">Pregunta 1</div><div class="reto-sub">Lee todo antes de hacer cualquier cosa</div></div></div>
     <div class="timer" id="tmr1"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv1">3:00</span></div>
     <div class="scene"><strong>Instrucción:</strong> Lee <u>todas</u> las instrucciones de esta lista antes de ejecutar cualquier acción.</div>
     <div class="card">
@@ -327,7 +344,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S2: VIERNES 5:55 ═══ -->
 <div class="screen" id="s2">
   <div class="reto-content" id="rc2">
-    <div class="reto-hdr"><div class="reto-chip">RETO 02</div><div><div class="reto-title">Viernes 5:55 p.m.</div><div class="reto-sub">3 momentos · 45 seg cada uno</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps2"></div><div class="reto-title">Pregunta 2</div><div class="reto-sub">3 momentos · 45 seg cada uno</div></div></div>
     <div class="timer" id="tmr2"><span>⏱</span><span class="timer-label">Momento <span id="capaLbl">1</span> de 3</span><span class="timer-val" id="tv2">0:45</span></div>
     <div id="c2_1">
       <div class="ealert"><div class="ea-title">⚡ Momento 1 — Tú eres quien contesta</div>Son las 5:55 p.m. del viernes. Tu celular suena. Es un comercio aliado de Redeban: llevan más de una hora sin poder recibir pagos con tarjeta. Tienen fila de clientes. Tu líder no contesta.<br><br><strong>¿Cuál es lo primero que haces? No lo que investigarías — lo que HACES ahora mismo.</strong></div>
@@ -350,7 +367,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S3: ZONA DE INFLUENCIA ═══ -->
 <div class="screen" id="s3">
   <div class="reto-content" id="rc3">
-    <div class="reto-hdr"><div class="reto-chip">RETO 03</div><div><div class="reto-title">Operación Rescate</div><div class="reto-sub">¿Qué puedes mover realmente?</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps3"></div><div class="reto-title">Pregunta 3</div><div class="reto-sub">¿Qué puedes mover realmente?</div></div></div>
     <div class="timer" id="tmr3"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv3">2:30</span></div>
     <div class="zona-situation"><div class="zs-title">🚨 Situación crítica</div>Tu proyecto lleva 2 semanas de retraso. La entrega es en 3 días. Tu equipo está bajo presión. Clasifica cada variable según tu capacidad de acción. <strong style="color:#e8c5c5;">Cada variable que traes a tu zona de acción suma puntos.</strong></div>
     <div class="zona-score"><span class="zona-pts" id="zonaScore">0</span>variables en tu zona de acción · <span id="zonaMsg">¡Clasifica para sumar!</span></div>
@@ -369,7 +386,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S4: EL PUZZLE ═══ -->
 <div class="screen" id="s4">
   <div class="reto-content" id="rc4">
-    <div class="reto-hdr"><div class="reto-chip">RETO 04</div><div><div class="reto-title">El día del lanzamiento</div><div class="reto-sub">¿Quién hizo qué y en qué orden?</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps4"></div><div class="reto-title">Pregunta 4</div><div class="reto-sub">¿Quién hizo qué y en qué orden?</div></div></div>
     <div class="timer" id="tmr4"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv4">4:00</span></div>
     <div class="scene">Cinco personas del equipo Redeban lanzaron una nueva funcionalidad. Cada una entregó un componente en un orden específico. <em>Con las pistas, descubre el orden completo.</em><br><br><strong>💬 ¿Atascado(a)?</strong> Escribe en tu grupo de WhatsApp o chat de Teams. La colaboración suma.</div>
     <div class="card" style="margin-bottom:11px;">
@@ -391,7 +408,43 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
       <div class="pista"><div class="pista-n">PISTA 09</div>Sara no entregó el API ni el Cierre.</div>
       <div class="pista"><div class="pista-n">PISTA 10</div>Las pistas 4 y 8 juntas te dicen más de lo que crees.</div>
     </div>
-    <div class="inp-grp"><label class="inp-lbl">Escribe el orden:</label><textarea id="r4" rows="6" placeholder="1: Persona → Componente&#10;2: Persona → Componente&#10;3: Persona → Componente&#10;4: Persona → Componente&#10;5: Persona → Componente"></textarea></div>
+    <div id="puzzle-mc">
+      <div class="pmc-q"><span class="pmc-q-lbl">¿Quién entregó en la posición 1?</span>
+        <div class="pmc-opt" onclick="pmcSel(0,this,'Helena')"><div class="pmc-radio"></div>Helena — Diagnóstico</div>
+        <div class="pmc-opt" onclick="pmcSel(0,this,'Andrés')"><div class="pmc-radio"></div>Andrés — Diagnóstico</div>
+        <div class="pmc-opt" onclick="pmcSel(0,this,'Marta')"><div class="pmc-radio"></div>Marta — API</div>
+        <div class="pmc-opt" onclick="pmcSel(0,this,'Sara')"><div class="pmc-radio"></div>Sara — Reporte</div>
+        <div class="pmc-opt" onclick="pmcSel(0,this,'Daniel')"><div class="pmc-radio"></div>Daniel — Manual</div>
+      </div>
+      <div class="pmc-q"><span class="pmc-q-lbl">¿Quién entregó en la posición 2?</span>
+        <div class="pmc-opt" onclick="pmcSel(1,this,'Helena')"><div class="pmc-radio"></div>Helena — API</div>
+        <div class="pmc-opt" onclick="pmcSel(1,this,'Andrés')"><div class="pmc-radio"></div>Andrés — API</div>
+        <div class="pmc-opt" onclick="pmcSel(1,this,'Sara')"><div class="pmc-radio"></div>Sara — Diagnóstico</div>
+        <div class="pmc-opt" onclick="pmcSel(1,this,'Marta')"><div class="pmc-radio"></div>Marta — Reporte</div>
+        <div class="pmc-opt" onclick="pmcSel(1,this,'Daniel')"><div class="pmc-radio"></div>Daniel — Cierre</div>
+      </div>
+      <div class="pmc-q"><span class="pmc-q-lbl">¿Quién entregó en la posición 3?</span>
+        <div class="pmc-opt" onclick="pmcSel(2,this,'Sara')"><div class="pmc-radio"></div>Sara — Reporte</div>
+        <div class="pmc-opt" onclick="pmcSel(2,this,'Marta')"><div class="pmc-radio"></div>Marta — API</div>
+        <div class="pmc-opt" onclick="pmcSel(2,this,'Helena')"><div class="pmc-radio"></div>Helena — Reporte</div>
+        <div class="pmc-opt" onclick="pmcSel(2,this,'Andrés')"><div class="pmc-radio"></div>Andrés — Manual</div>
+        <div class="pmc-opt" onclick="pmcSel(2,this,'Daniel')"><div class="pmc-radio"></div>Daniel — API</div>
+      </div>
+      <div class="pmc-q"><span class="pmc-q-lbl">¿Quién entregó en la posición 4?</span>
+        <div class="pmc-opt" onclick="pmcSel(3,this,'Marta')"><div class="pmc-radio"></div>Marta — Manual</div>
+        <div class="pmc-opt" onclick="pmcSel(3,this,'Sara')"><div class="pmc-radio"></div>Sara — Manual</div>
+        <div class="pmc-opt" onclick="pmcSel(3,this,'Andrés')"><div class="pmc-radio"></div>Andrés — Reporte</div>
+        <div class="pmc-opt" onclick="pmcSel(3,this,'Helena')"><div class="pmc-radio"></div>Helena — Manual</div>
+        <div class="pmc-opt" onclick="pmcSel(3,this,'Daniel')"><div class="pmc-radio"></div>Daniel — Diagnóstico</div>
+      </div>
+      <div class="pmc-q"><span class="pmc-q-lbl">¿Quién entregó en la posición 5?</span>
+        <div class="pmc-opt" onclick="pmcSel(4,this,'Daniel')"><div class="pmc-radio"></div>Daniel — Cierre</div>
+        <div class="pmc-opt" onclick="pmcSel(4,this,'Marta')"><div class="pmc-radio"></div>Marta — Cierre</div>
+        <div class="pmc-opt" onclick="pmcSel(4,this,'Sara')"><div class="pmc-radio"></div>Sara — Manual</div>
+        <div class="pmc-opt" onclick="pmcSel(4,this,'Helena')"><div class="pmc-radio"></div>Helena — Cierre</div>
+        <div class="pmc-opt" onclick="pmcSel(4,this,'Andrés')"><div class="pmc-radio"></div>Andrés — Cierre</div>
+      </div>
+    </div>
     <button class="btn btn-p" onclick="confirmar(4)">Confirmar →</button>
   </div>
 </div>
@@ -399,7 +452,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S5: LA HORMIGA ═══ -->
 <div class="screen" id="s5">
   <div class="reto-content" id="rc5">
-    <div class="reto-hdr"><div class="reto-chip">RETO 05</div><div><div class="reto-title">La hormiga del pozo</div><div class="reto-sub">Confía en tu primer instinto... o no</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps5"></div><div class="reto-title">Pregunta 5</div><div class="reto-sub">Confía en tu primer instinto... o no</div></div></div>
     <div class="timer" id="tmr5"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv5">1:00</span></div>
     <div class="scene" style="font-size:16px;line-height:1.85;text-align:center;padding:24px 20px;">Una hormiga cae a un pozo de <strong>30 metros</strong>.<br>Cada día sube <strong>3 metros</strong>.<br>Cada noche resbala <strong>2 metros</strong>.<br><br><strong>¿Cuántos días tarda en salir?</strong><br><span style="font-size:12px;color:var(--muted);">Solo el número.</span></div>
     <div class="inp-grp"><input type="text" id="r5" placeholder="Tu respuesta..." autocomplete="off" inputmode="numeric"></div>
@@ -416,7 +469,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S6: EL MÉDICO ═══ -->
 <div class="screen" id="s6">
   <div class="reto-content" id="rc6">
-    <div class="reto-hdr"><div class="reto-chip">RETO 06</div><div><div class="reto-title">El médico</div><div class="reto-sub">Pensamiento lateral · 1 minuto</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps6"></div><div class="reto-title">Pregunta 6</div><div class="reto-sub">¿Qué asumes sin darte cuenta? · 1 minuto</div></div></div>
     <div class="timer" id="tmr6"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv6">1:00</span></div>
     <div class="scene" style="font-size:16px;line-height:1.85;text-align:center;padding:24px 20px;">Un padre y su hijo tienen un accidente de carro.<br>El padre muere en el acto.<br>El hijo llega al hospital y el médico dice:<br><br><em style="font-size:18px;">"No puedo operar a este niño.<br>Es mi hijo."</em><br><br><strong style="font-size:14px;color:var(--muted);">¿Cómo es posible?</strong></div>
     <div class="inp-grp"><input type="text" id="r6" placeholder="Tu respuesta..." autocomplete="off"></div>
@@ -433,7 +486,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S7: EL ATAÚD ═══ -->
 <div class="screen" id="s7">
   <div class="reto-content" id="rc7">
-    <div class="reto-hdr"><div class="reto-chip">RETO 07</div><div><div class="reto-title">Lo que nadie usa conscientemente</div><div class="reto-sub">Pensamiento lateral · 45 segundos</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps7"></div><div class="reto-title">Pregunta 7</div><div class="reto-sub">Patrones invisibles · 45 segundos</div></div></div>
     <div class="timer" id="tmr7"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv7">0:45</span></div>
     <div class="scene" style="font-size:17px;line-height:1.85;text-align:center;padding:28px 20px;">Los fabricantes lo crean para otras personas.<br>Los compradores no lo compran para ellos.<br>Y quienes lo usan, no saben que lo están usando.<br><br><strong style="font-size:14px;color:var(--muted);">¿Qué es?</strong></div>
     <div class="inp-grp"><input type="text" id="r7" placeholder="Tu respuesta..." autocomplete="off"></div>
@@ -450,7 +503,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S8: EL LANZAMIENTO ═══ -->
 <div class="screen" id="s8">
   <div class="reto-content" id="rc8">
-    <div class="reto-hdr"><div class="reto-chip">RETO 08</div><div><div class="reto-title">El lanzamiento del 70%</div><div class="reto-sub">Selecciona todo lo que harías</div></div></div>
+    <div class="reto-hdr"><div><div class="step-indicator" id="steps8"></div><div class="reto-title">Pregunta 8</div><div class="reto-sub">Selecciona todo lo que harías</div></div></div>
     <div class="timer" id="tmr8"><span>⏱</span><span class="timer-label">Tiempo restante</span><span class="timer-val" id="tv8">1:30</span></div>
     <div class="scene">Tu equipo debe lanzar una funcionalidad clave <strong>mañana a las 9 a.m.</strong> Tienes el <strong>70% de la información</strong> que necesitas. El 30% restante depende de otra área que no responde hace 2 días. Son las 6 p.m. de hoy.<br><br><em>Selecciona todo lo que harías.</em></div>
     <ul class="opts" id="r8opts">
@@ -470,18 +523,18 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 <!-- ═══ S9: CIERRE DWECK ═══ -->
 <div class="screen" id="s9">
   <div class="reto-hdr"><div class="reto-chip">CIERRE</div><div><div class="reto-title">Para terminar</div><div class="reto-sub">3 preguntas · Sin tiempo · Solo honestidad</div></div></div>
+  <p style="font-size:12px;color:var(--accent);margin-bottom:20px;padding:10px 14px;background:rgba(255,82,82,0.06);border:1px solid rgba(255,82,82,0.15);border-radius:8px;">⚡ Las 3 preguntas son obligatorias para ver tu resultado.</p>
 
   <div class="card">
     <div class="card-lbl">Pregunta 1 de 3 — Desafíos</div>
-    <p style="font-size:15px;color:var(--white);margin-bottom:6px;line-height:1.6;">Cuando llegué a un reto que no sabía cómo resolver, lo primero que pensé fue...</p>
+    <p style="font-size:15px;color:var(--white);margin-bottom:6px;line-height:1.6;">Cuando llegué a una pregunta que no sabía cómo resolver, lo primero que pensé fue...</p>
     <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige la que más se acerque a tu experiencia real</p>
     <div class="grad-wrap" id="dq1">
       <div class="grad-opt go1" onclick="selGrad('dq1',this,'1')"><div class="grad-dot"></div>"Esto no es para mí, claramente no tengo lo que se necesita."</div>
       <div class="grad-opt go2" onclick="selGrad('dq1',this,'2')"><div class="grad-dot"></div>"Si no sé la respuesta rápido, mejor me salto esto."</div>
       <div class="grad-opt go3" onclick="selGrad('dq1',this,'3')"><div class="grad-dot"></div>"No sé todavía, pero voy a intentarlo igual."</div>
-      <div class="grad-opt go4" onclick="selGrad('dq1',this,'4')"><div class="grad-dot"></div>"Un reto que no sé resolver es exactamente el que más me interesa."</div>
+      <div class="grad-opt go4" onclick="selGrad('dq1',this,'4')"><div class="grad-dot"></div>"Una pregunta que no sé resolver es exactamente la que más me interesa."</div>
     </div>
-    <div class="grad-legend"><span class="gl-fija">← Mentalidad fija</span><span class="gl-creci">Mentalidad de crecimiento →</span></div>
   </div>
 
   <div class="card">
@@ -494,23 +547,21 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
       <div class="grad-opt go3" onclick="selGrad('dq2',this,'3')"><div class="grad-dot"></div>Me tomé un momento, intenté de nuevo aunque quedara incompleto.</div>
       <div class="grad-opt go4" onclick="selGrad('dq2',this,'4')"><div class="grad-dot"></div>La frustración me activó — intenté más fuerte y busqué ayuda.</div>
     </div>
-    <div class="grad-legend"><span class="gl-fija">← Mentalidad fija</span><span class="gl-creci">Mentalidad de crecimiento →</span></div>
   </div>
 
   <div class="card">
-    <div class="card-lbl">Pregunta 3 de 3 — Autenticidad</div>
-    <p style="font-size:15px;color:var(--white);margin-bottom:6px;line-height:1.6;">Si supieras que tu resultado de hoy lo va a ver tu equipo, ¿cambiarías alguna respuesta?</p>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige la que más se acerque a tu experiencia real</p>
+    <div class="card-lbl">Pregunta 3 de 3 — Conexión con Redeban</div>
+    <p style="font-size:15px;color:var(--white);margin-bottom:6px;line-height:1.6;">Pensando en lo que viviste hoy, ¿en qué parte de tu trabajo diario en Redeban sientes que aplica más lo que practicamos?</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige la que más resuene contigo</p>
     <div class="grad-wrap" id="dq3">
-      <div class="grad-opt go1" onclick="selGrad('dq3',this,'1')"><div class="grad-dot"></div>Sí, cambiaría varias — quiero que me vean bien.</div>
-      <div class="grad-opt go2" onclick="selGrad('dq3',this,'2')"><div class="grad-dot"></div>Cambiaría alguna por las dudas.</div>
-      <div class="grad-opt go3" onclick="selGrad('dq3',this,'3')"><div class="grad-dot"></div>Probablemente no, fui bastante honesto(a).</div>
-      <div class="grad-opt go4" onclick="selGrad('dq3',this,'4')"><div class="grad-dot"></div>No — respondí igual que respondería si nadie estuviera mirando.</div>
+      <div class="grad-opt go1" onclick="selGrad('dq3',this,'1')"><div class="grad-dot"></div>Cuando tengo que tomar decisiones rápidas sin tener toda la información.</div>
+      <div class="grad-opt go2" onclick="selGrad('dq3',this,'2')"><div class="grad-dot"></div>Cuando coordino con otras áreas y siento que no hablamos el mismo idioma.</div>
+      <div class="grad-opt go3" onclick="selGrad('dq3',this,'3')"><div class="grad-dot"></div>Cuando el cliente (interno o externo) necesita algo y los procesos no me lo facilitan.</div>
+      <div class="grad-opt go4" onclick="selGrad('dq3',this,'4')"><div class="grad-dot"></div>Cuando hay cambios en la organización y no sé bien cómo adaptarme.</div>
     </div>
-    <div class="grad-legend"><span class="gl-fija">← Mentalidad fija</span><span class="gl-creci">Mentalidad de crecimiento →</span></div>
   </div>
 
-  <button class="btn btn-p" onclick="showResults()">Ver mi resultado →</button>
+  <button class="btn btn-p" onclick="validateAndShowResults()">Ver mi resultado →</button>
 </div>
 
 <!-- ═══ S10: RESULTADOS ═══ -->
@@ -534,10 +585,29 @@ input::placeholder,textarea::placeholder{color:var(--muted);}
 
 </div><!-- /wrap -->
 
+<!-- REDEBAN STRIP -->
+<div class="rb-strip">
+  <img src="https://www.redeban.com/sites/default/files/Logo.png" alt="Redeban" onerror="this.style.display='none'">
+  <span>Construyendo país · Cultura Redeban</span>
+</div>
+
 <script>
 var D={nombre:'',area:'',scores:{},ans:{},zonaD:{},r8sel:[],dq:{},tmrInt:null,capa:1,screen:0};
 var TIMES={1:180,2:45,3:150,4:240,5:60,6:60,7:45,8:90};
-var RNAMES=['','Lista de verificación','Viernes 5:55 p.m.','Operación Rescate','El día del lanzamiento','La hormiga','El médico','El ataúd','El lanzamiento del 70%'];
+var RNAMES=['','Pregunta 1','Pregunta 2','Pregunta 3','Pregunta 4','Pregunta 5','Pregunta 6','Pregunta 7','Pregunta 8'];
+
+function renderSteps(current){
+  for(var s=1;s<=8;s++){
+    var el=document.getElementById('steps'+s);
+    if(!el)continue;
+    el.innerHTML='';
+    for(var i=1;i<=8;i++){
+      var d=document.createElement('div');
+      d.className='step-dot'+(i<current?' done':(i===current?' active':''));
+      el.appendChild(d);
+    }
+  }
+}
 
 function showScreen(n){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
@@ -551,6 +621,9 @@ function showScreen(n){
     document.getElementById('progPct').textContent=p+'%';
     document.getElementById('progLbl').textContent='Reto '+n+' de 8';
     document.getElementById('hdrReto').textContent=RNAMES[n]||'';
+    renderSteps(n);
+    // Auto-start timer for all retos except reto 1 (started by startRally) and reto 2 (managed by nextCapa)
+    if(n!==1&&n!==2){startTimer(n);}
   } else {pw.style.display='none';}
 }
 
@@ -623,7 +696,11 @@ function confirmar(reto,auto){
 function saveAns(r){
   if(r===1)D.ans[1]=(document.getElementById('r1')||{}).value||'';
   if(r===2){D.ans['2a']=(document.getElementById('r2a')||{}).value||'';D.ans['2b']=(document.getElementById('r2b')||{}).value||'';D.ans['2c']=(document.getElementById('r2c')||{}).value||'';}
-  if(r===4)D.ans[4]=(document.getElementById('r4')||{}).value||'';
+  if(r===4){
+    var rows=[];
+    for(var i=0;i<5;i++){rows.push(pmcData[i]||'');}
+    D.ans[4]=rows.join('|');
+  }
   if(r===5)D.ans[5]=(document.getElementById('r5')||{}).value||'';
   if(r===6)D.ans[6]=(document.getElementById('r6')||{}).value||'';
   if(r===7)D.ans[7]=(document.getElementById('r7')||{}).value||'';
@@ -634,7 +711,11 @@ function calcScore(r){
   if(r===1){var v=(D.ans[1]||'').toLowerCase().trim();p=v.indexOf('autorizado')!==-1?100:(v.length>0?20:0);D.scores[1]=p;}
   if(r===2){var a=D.ans['2a']||'',b=D.ans['2b']||'',c=D.ans['2c']||'';if(a.length>10)p+=30;if(b.length>10)p+=30;if(c.length>10)p+=40;D.scores[2]=p;}
   if(r===3){var pts=0,correct={0:'c',1:'o',2:'c',3:'i',4:'o',5:'i'};for(var k in D.zonaD){pts+=10;if(D.zonaD[k]===correct[k])pts+=5;}D.scores[3]=Math.min(pts,100);}
-  if(r===4){var ans=(D.ans[4]||'').toLowerCase();var sol=[/helena.*diagnóstico|helena.*diagnostico/i,/andrés.*api|andres.*api/i,/sara.*reporte/i,/marta.*manual/i,/daniel.*cierre/i];var m=0;sol.forEach(function(rx){if(rx.test(ans))m++;});D.scores[4]=m*20;}
+  if(r===4){
+    var m4=0;
+    for(var i=0;i<5;i++){if((pmcData[i]||'')===pmcCorrect[i])m4++;}
+    D.scores[4]=m4*20;
+  }
   if(r===5){var n=parseInt((D.ans[5]||'').trim());p=n===28?100:(n===30?10:(n>0?20:0));D.scores[5]=p;}
   if(r===6){var v6=(D.ans[6]||'').toLowerCase();p=(v6.indexOf('mamá')!==-1||v6.indexOf('mama')!==-1||v6.indexOf('madre')!==-1||v6.indexOf('mujer')!==-1)?100:(v6.length>0?15:0);D.scores[6]=p;}
   if(r===7){var v7=(D.ans[7]||'').toLowerCase();p=(v7.indexOf('ataúd')!==-1||v7.indexOf('ataud')!==-1||v7.indexOf('féretro')!==-1||v7.indexOf('feretro')!==-1||v7.indexOf('cajón')!==-1||v7.indexOf('cajon')!==-1)?100:(v7.length>0?15:0);D.scores[7]=p;}
@@ -670,6 +751,17 @@ function checkAcertijo(reto, forced){
 }
 
 /* ZONA */
+/* PUZZLE MC */
+var pmcData={};
+// Correct answers per position (index): Helena, Andrés, Sara, Marta, Daniel
+var pmcCorrect=['Helena','Andrés','Sara','Marta','Daniel'];
+function pmcSel(pos,el,val){
+  pmcData[pos]=val;
+  var q=el.closest('.pmc-q');
+  q.querySelectorAll('.pmc-opt').forEach(function(o){o.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
 var subQs={c:[{q:'¿Qué acción concreta tomas hoy?'}],i:[{q:'¿A quién contactas para moverlo?'}],o:[]};
 
 function zonaSelect(idx,type){
@@ -784,10 +876,17 @@ function mcContinue() {
   if (_mcNext) { var fn = _mcNext; _mcNext = null; fn(); }
 }
 
+function validateAndShowResults(){
+  if(!D.dq['dq1']){showToast('Por favor responde la Pregunta 1 para continuar 👆');return;}
+  if(!D.dq['dq2']){showToast('Por favor responde la Pregunta 2 para continuar 👆');return;}
+  if(!D.dq['dq3']){showToast('Por favor responde la Pregunta 3 para continuar 👆');return;}
+  showResults();
+}
+
 function showResults(){
   var total=Object.values(D.scores).reduce(function(a,b){return a+b;},0);
   document.getElementById('finalNum').textContent=total;
-  var names={1:'Lista de verificación',2:'Viernes 5:55 p.m.',3:'Operación Rescate',4:'El día del lanzamiento',5:'La hormiga',6:'El médico',7:'El ataúd',8:'El lanzamiento del 70%'};
+  var names={1:'Pregunta 1',2:'Pregunta 2',3:'Pregunta 3',4:'Pregunta 4',5:'Pregunta 5',6:'Pregunta 6',7:'Pregunta 7',8:'Pregunta 8'};
   var bd=document.getElementById('breakdown');bd.innerHTML='';
   for(var i=1;i<=8;i++){var sc=D.scores[i]||0;var cls=sc>=80?'pt-g':(sc>=40?'pt-p':'pt-z');bd.innerHTML+='<div class="bd-item"><span class="bd-name">'+names[i]+'</span><span class="bd-pt '+cls+'">'+sc+'/100</span></div>';}
   var msgs=['Cada decisión que tomaste hoy refleja la mentalidad con la que navegarás el cambio en Redeban. No hay resultado perfecto — hay aprendizaje continuo.','La forma en que respondiste bajo presión dice más sobre tu agilidad que cualquier respuesta correcta. Eso es adaptabilidad en acción.','Hoy pusiste a prueba seis comportamientos de Adaptabilidad al cambio. El que más activaste es tu punto de partida para seguir creciendo.'];

@@ -1,66 +1,123 @@
-var SHEET_NAME = 'RallyData';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSprint · Dashboard · Redeban</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500&family=Barlow+Condensed:wght@300;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #04122e; --teal: #00b89c; --teal2: #00e8c6; --white: #eef2fb; --muted: #4a6285;
+  --card: rgba(5,20,58,0.82); --border: rgba(0,184,156,0.14);
+}
+body { background: var(--bg); color: var(--white); font-family: 'Barlow', sans-serif; overflow: hidden; height: 100vh; }
+body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle, rgba(0,184,156,0.1) 1px, transparent 1px); background-size: 40px 40px; }
+#shell { display: grid; grid-template-rows: 56px 1fr; height: 100vh; position: relative; z-index: 1; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 0 28px; background: rgba(4,18,46,0.9); border-bottom: 1px solid var(--border); }
+#main { display: grid; grid-template-columns: 260px 1fr 280px; gap: 14px; padding: 14px; overflow: hidden; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; }
+.kpi-big { font-size: 80px; font-weight: 800; color: var(--teal2); text-align: center; }
+.q-text { font-size: 13px; font-weight: 600; margin-bottom: 10px; border-bottom: 1px solid rgba(0,184,156,0.1); padding-bottom: 5px; }
+.opt-row { display: grid; grid-template-columns: 20px 1fr 100px 40px; align-items: center; gap: 8px; font-size: 11px; margin-bottom: 4px; }
+.opt-bar-wrap { height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+.opt-bar-fill { height: 100%; background: var(--teal); transition: width 1s ease-out; }
+.top5-list { list-style: none; }
+.t5-item { padding: 8px; background: rgba(255,255,255,0.02); margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; font-size: 12px; }
+#loading { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; justify-content: center; align-items: center; }
+#loading.gone { opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="loading"><div>CONECTANDO...</div></div>
+<div id="shell">
+  <header>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="https://www.redeban.com/sites/default/files/Logo.png" height="20" style="filter:invert(1)">
+      <span>MindSprint · Centro de Control</span>
+    </div>
+    <div id="ticker">Sincronizando...</div>
+  </header>
+  <div id="main">
+    <div id="col-left">
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:10px; color:var(--muted)">Puntaje Promedio</div>
+        <div class="kpi-big" id="avg-num">0</div>
+      </div>
+      <div class="card">
+        <div style="font-size:10px; color:var(--muted)">Participantes</div>
+        <div class="kpi-big" id="part-num">0</div>
+      </div>
+    </div>
+    <div id="col-center" style="overflow-y:auto; scrollbar-width:none;">
+      <div class="card" style="margin-bottom:14px">
+        <div class="q-text">1. ¿Qué pensaste ante un desafío?</div>
+        <div id="q1-rows"></div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="q-text">2. ¿Qué hiciste ante la frustración?</div>
+        <div id="q2-rows"></div>
+      </div>
+      <div class="card">
+        <div class="q-text">3. ¿Dónde aplica esto en Redeban?</div>
+        <div id="q3-rows"></div>
+      </div>
+    </div>
+    <div class="card" id="col-right">
+      <div style="font-size:10px; color:var(--muted); margin-bottom:10px">TOP 5 AGILIDAD</div>
+      <div id="top5"></div>
+    </div>
+  </div>
+</div>
 
-function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  var data = sheet.getDataRange().getValues();
-  var headers = data[0];
-  var rows = [];
-  for (var i = 1; i < data.length; i++) {
-    var row = {};
-    for (var j = 0; j < headers.length; j++) { row[headers[j]] = data[i][j]; }
-    rows.push(row);
-  }
-  return ContentService.createTextOutput(JSON.stringify(rows)).setMimeType(ContentService.MimeType.JSON);
+<script>
+const GAS = 'https://script.google.com/macros/s/AKfycbyp0TQiONdDWByBNgcEMyVZWwCnHq4EFKSCPFGhZEVVxSlCBiRP9lj6iH9jVgDUkhuM/exec';
+const Q_TEXTS = {
+  dq1: ['Esto no es para mí', 'Me salto esto', 'Voy a intentarlo', 'Me interesa mucho'],
+  dq2: ['Dejé en blanco', 'Escribí rápido', 'Intenté de nuevo', 'Busqué ayuda'],
+  dq3: ['Decisiones rápidas', 'Coordinación áreas', 'Servicio cliente', 'Cambio org.']
+};
+
+async function fetchData() {
+  try {
+    const res = await fetch(GAS);
+    const rows = await res.json();
+    render(rows);
+    document.getElementById('loading').classList.add('gone');
+    document.getElementById('ticker').textContent = 'Última act: ' + new Date().toLocaleTimeString();
+  } catch(e) { document.getElementById('ticker').textContent = 'Error de conexión'; }
 }
 
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  var data = JSON.parse(e.postData.contents);
-  var values = sheet.getDataRange().getValues();
-  var nombreUser = data.nombre;
-  var filaUsuario = -1;
+function render(rows) {
+  const n = rows.length;
+  if(n === 0) return;
+  const avg = rows.reduce((s, r) => s + (Number(r.total) || 0), 0) / n;
+  document.getElementById('avg-num').textContent = Math.round(avg);
+  document.getElementById('part-num').textContent = n;
 
-  for (var i = 1; i < values.length; i++) {
-    if (values[i][1] === nombreUser) { filaUsuario = i + 1; break; }
-  }
+  ['dq1', 'dq2', 'dq3'].forEach((dq, idx) => {
+    const counts = {1:0, 2:0, 3:0, 4:0};
+    rows.forEach(r => counts[r[dq]]++);
+    let html = '';
+    for(let i=1; i<=4; i++) {
+      const pct = Math.round((counts[i]/n)*100) || 0;
+      html += `<div class="opt-row">
+        <span>${String.fromCharCode(96+i)}.</span>
+        <span style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis">${Q_TEXTS[dq][i-1]}</span>
+        <div class="opt-bar-wrap"><div class="opt-bar-fill" style="width:${pct}%"></div></div>
+        <span style="text-align:right">${pct}%</span>
+      </div>`;
+    }
+    document.getElementById('q'+(idx+1)+'-rows').innerHTML = html;
+  });
 
-  // MAPEO EXACTO PARA TUS 29 COLUMNAS (A hasta AC)
-  var rowData = [
-    data.timestamp, // A
-    data.nombre,    // B
-    data.area,      // C
-    data.total,     // D
-    data.scores[1] || 0, // E
-    data.scores[2] || 0, // F
-    data.scores[3] || 0, // G
-    data.scores[4] || 0, // H
-    data.scores[5] || 0, // I
-    data.scores[6] || 0, // J
-    data.scores[7] || 0, // K
-    data.scores[8] || 0, // L
-    data.r2a || '',      // M
-    data.r2b || '',      // N
-    data.r2c || '',      // O
-    data.r4 || '',       // P
-    data.r5 || '',       // Q
-    data.r6 || '',       // R
-    data.r7 || '',       // S
-    data.r8sel || '',    // T
-    (data.zona && data.zona.var_0) ? data.zona.var_0.tipo : '', // U
-    (data.zona && data.zona.var_1) ? data.zona.var_1.tipo : '', // V
-    (data.zona && data.zona.var_2) ? data.zona.var_2.tipo : '', // W
-    (data.zona && data.zona.var_3) ? data.zona.var_3.tipo : '', // X
-    (data.zona && data.zona.var_4) ? data.zona.var_4.tipo : '', // Y
-    (data.zona && data.zona.var_5) ? data.zona.var_5.tipo : '', // Z
-    data.dq1 || '', // AA
-    data.dq2 || '', // AB
-    data.dq3 || ''  // AC
-  ];
-
-  if (filaUsuario !== -1) {
-    sheet.getRange(filaUsuario, 1, 1, rowData.length).setValues([rowData]);
-  } else {
-    sheet.appendRow(rowData);
-  }
-  return ContentService.createTextOutput(JSON.stringify({"result":"success"})).setMimeType(ContentService.MimeType.JSON);
+  const sorted = rows.sort((a,b) => (b.total||0) - (a.total||0)).slice(0,5);
+  document.getElementById('top5').innerHTML = sorted.map((r,i) => `
+    <div class="t5-item"><span>#${i+1} ${r.nombre}</span><b>${r.total}</b></div>
+  `).join('');
 }
+
+setInterval(fetchData, 15000);
+fetchData();
+</script>
+</body>
+</html>
